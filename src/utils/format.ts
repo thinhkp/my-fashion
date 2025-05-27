@@ -1,5 +1,5 @@
-export function formatCurrencyVND(amount: number | null): string {
-  if (amount == null) return ""
+export function formatCurrencyVND(amount: number | null | undefined): string {
+  if (amount == null || amount ==undefined ) return ""
 
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",

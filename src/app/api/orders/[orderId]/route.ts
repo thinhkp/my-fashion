@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/services/prisma';
+import { Order } from '@/types/model';
 
 // GET: Fetch order details
 export async function GET(
@@ -19,7 +20,7 @@ export async function GET(
     }
 
     // Fetch the order with all related data
-    const order = await prisma.order.findUnique({
+    const order : Order | null = await prisma.order.findUnique({
       where: {
         id: orderId,
       },
@@ -61,7 +62,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(order);
+    return NextResponse.json({order});
   } catch (error) {
     console.error('Error fetching order details:', error);
     return NextResponse.json(

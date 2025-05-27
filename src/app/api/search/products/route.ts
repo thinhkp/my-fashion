@@ -1,5 +1,13 @@
-import { searchProducts } from "@/services/data";
+import { getProductIdsByQuery } from "@/services/data";
 import { NextRequest, NextResponse } from "next/server";
+
+
+export type GetRes = {
+  success: boolean;
+  productIds?: string[];
+  error?: string;
+  message?: string;
+}
 
 export async function GET(req: NextRequest) {
   try {
@@ -11,10 +19,8 @@ export async function GET(req: NextRequest) {
     const minPrice = parseInt(searchParams.get("minPrice") || "0");
     const maxPrice = parseInt(searchParams.get("maxPrice") || "999999999");
     const categorySlug = searchParams.get("categorySlug")  || ""
-    console.log( sizes ,colors );
-    
 
-    const products = await searchProducts({
+    const productIds = await getProductIdsByQuery({
       sizes,
       colors,
       minPrice,
@@ -24,7 +30,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: products,
+      productIds, 
     });
 
   } catch (error) {

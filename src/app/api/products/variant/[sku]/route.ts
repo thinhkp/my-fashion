@@ -59,7 +59,7 @@ export async function GET(
       variantId: variant.id,
     };
 
-    return NextResponse.json(responseData);
+    return NextResponse.json({variant :responseData}, { status: 200 });
   } catch (error) {
     console.error("Error fetching variant by SKU:", error);
     return NextResponse.json(

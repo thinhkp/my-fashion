@@ -1,5 +1,5 @@
 "use client";
-import React, {  useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 import type { Category, Color, Product, Size } from "@/types/model";
 import ProductCard from "@/components/ProductCard";
@@ -21,11 +21,16 @@ import { Slider } from "@/components/ui/slider";
 import gsap from "gsap";
 import { Slash, Terminal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { createUrl, fetchApi } from "@/api";
 import { useDebounce } from "use-debounce";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { formatCurrencyVND } from "@/utils/format";
+import axios from "axios";
+import { GetRes as GetSearchIdRes } from "@/app/api/search/products/route";
+import { GetRes as GetProductByIdRes } from "@/app/api/products/by-id/[id]/route";
+import { se } from "date-fns/locale";
+import ProductCardSkeleton from "@/components/ProductCardSkeleton";
 
 type ViewProps = {
   products: Product[];
@@ -60,45 +65,55 @@ const View = ({ products: initProduct, sizes, colors, cate }: ViewProps) => {
     }
   };
 
-  const { data, isLoading, isFetching } = useQuery({
-    queryKey: [
-      "searchedProduct",
-      ...selectedSizes,
-      ...selectedColors,
-      ...rangeDebounce,
-    ],
+  const {
+    data: searchPIds,
+    isFetching: searchPIdsFetching,
+    refetch: searchPrefetch,
+  } = useQuery({
+    queryKey: ["searchedProductIds"],
     queryFn: async () => {
       try {
-        return await fetchApi<{ data?: Product[] }>({
-          url: createUrl("/api/search/products", {
+        const res = await axios.get<GetSearchIdRes>(
+          createUrl("/api/search/products", {
             sizes: selectedSizes,
             colors: selectedColors,
             minPrice: range[0],
             maxPrice: range[1],
             categorySlug: cate?.slug || "",
-          }),
-        });
+          })
+        );
+        return res.data.productIds || [];
       } catch (error) {
         console.error("Error fetching products:", error);
-        return { data: [] };
+        return [];
       }
     },
     staleTime: 0,
     retry: false,
   });
 
-  // Safely handle products data with proper null checking and error handling
-  const products = React.useMemo(() => {
-    if (!data || !data.data) {
-      return initProduct || [];
-    }
+  const productQueries = useQueries({
+    queries:
+      searchPIds?.map((id) => ({
+        queryKey: ["product", id],
+        queryFn: async () => {
+          return await axios
+            .get<GetProductByIdRes>(`/api/products/by-id/${id}`)
+            .then((res) => res.data.product);
+        },
+        enabled: !!searchPIds,
+      })) || [],
+  });
 
-    // Filter out null/undefined products and ensure each has required properties
-    return data.data.filter(
-      (product) =>
-        product !== null && product !== undefined && typeof product === "object"
-    );
-  }, [data, initProduct]);
+  const data = productQueries.map((query) => {
+    return query.data; // Return the product data
+  });
+
+  // Safely handle products data with proper null checking and error handling
+  const products = data || initProduct;
+
+  console.log(searchPIds);
+  console.log(products);
 
   const selectedRef = useRef<HTMLDivElement>(null);
 
@@ -107,6 +122,11 @@ const View = ({ products: initProduct, sizes, colors, cate }: ViewProps) => {
     selectedSizes.length > 0 ||
     range[0] !== 0 ||
     range[1] !== 3000000;
+
+  useEffect(() => {
+      searchPrefetch();
+  }, [selectedSizes, selectedColors , rangeDebounce])
+  
 
   useLayoutEffect(() => {
     if (!selectedRef.current) return;
@@ -324,18 +344,10 @@ const View = ({ products: initProduct, sizes, colors, cate }: ViewProps) => {
 
           {/* Products grid */}
           <div className="grid grid-cols-4 gap-4">
-            {isLoading || isFetching ? (
-              // Show skeleton loaders while loading
-              Array.from({ length: 8 }).map((_, index) => (
-                <div
-                  key={`skeleton-${index}`}
-                  className="animate-pulse bg-gray-200 rounded-md h-[300px]"
-                ></div>
-              ))
-            ) : products && products.length > 0 ? (
+            {(products && products.length > 0) || searchPIdsFetching ? (
               // Show actual products with null check for each item
-              products.map((item) => {
-                if (!item) return null;
+              products.map((item, index) => {
+                if (!item) return <ProductCardSkeleton key={`pske-${index}`} />;
                 try {
                   return <ProductCard key={`product-${item.id}`} item={item} />;
                 } catch (error) {

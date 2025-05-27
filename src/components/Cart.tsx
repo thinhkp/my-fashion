@@ -1,7 +1,7 @@
 "use client";
 
 import { ShoppingBag, X, Plus, Minus } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
   Drawer,
   DrawerTrigger,
@@ -24,15 +24,23 @@ import { Skeleton } from "./ui/skeleton";
 const Cart = () => {
   const [total, setTotal] = useState(0);
 
-  const {
-    cartItemLocal,
-    isLoading,
-    decreaseQuantity,
-    increaseQuantity,
-    removeFromCart,
-  } = useCart();
+  const { cartItemData, decreaseQuantity, increaseQuantity, removeFromCart } =
+    useCart();
 
-  
+  useLayoutEffect(() => {
+    if (cartItemData && cartItemData.length > 0) {
+      // Calculate total price only
+      const newTotal = cartItemData.reduce((sum, item) => {
+        const itemPrice = item?.discountprice || item?.price || 0;
+        return sum + itemPrice * (item?.quantity || 1);
+      }, 0);
+
+      setTotal(newTotal);
+    } else {
+      setTotal(0);
+    }
+  }, [cartItemData]);
+
   const freeShipPercent =
     (total / 500000) * 100 > 100 ? 100 : (total / 500000) * 100;
 
@@ -41,15 +49,18 @@ const Cart = () => {
       <Drawer direction="right">
         <DrawerTrigger asChild className="relative">
           <div className="relative">
-            <span className=" bg-red-500 text-white flex items-center justify-center text-xs aspect-square h-6 w-6  absolute  -top-[50%] left-full rounded-full" suppressHydrationWarning>
-              {cartItemLocal?.length || 0}{" "}
+            <span
+              className="bg-red-500 text-white flex items-center justify-center text-xs aspect-square h-6 w-6 absolute -top-[50%] left-full rounded-full"
+              suppressHydrationWarning
+            >
+              {cartItemData.length || 0}
             </span>
             <ShoppingBag></ShoppingBag>
           </div>
         </DrawerTrigger>
-        <DrawerContent className=" data-[vaul-drawer-direction=right]:sm:w-120 data-[vaul-drawer-direction=right]:sm:max-w-auto  data-[vaul-drawer-direction=right]:h-screen">
+        <DrawerContent className="data-[vaul-drawer-direction=right]:sm:w-120 data-[vaul-drawer-direction=right]:sm:max-w-auto data-[vaul-drawer-direction=right]:h-screen">
           <div className="flex flex-col h-full w-full overflow-y-hidden">
-            <DrawerHeader className=" p-[15px] border-b border-gray-200">
+            <DrawerHeader className="p-[15px] border-b border-gray-200">
               <div className="flex justify-between items-center mb-5">
                 <DrawerTitle className="text-2xl font-bold">
                   Giỏ hàng
@@ -59,7 +70,7 @@ const Cart = () => {
                   <X />
                 </DrawerClose>
               </div>
-              {cartItemLocal && cartItemLocal.length > 0 && (
+              {cartItemData && cartItemData.length > 0 && (
                 <div className="">
                   {total < 500000 && (
                     <span className="text-sm">
@@ -95,24 +106,21 @@ const Cart = () => {
                 </div>
               )}
             </DrawerHeader>
-            <div className=" grow min-h-0 flex flex-col ">
+            <div className="grow min-h-0 flex flex-col">
               {/* Loading state */}
-              {isLoading && (
-                <div className="p-4 space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="flex gap-4 items-center">
-                      <Skeleton className="h-16 w-16 rounded" />
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-[200px]" />
-                        <Skeleton className="h-4 w-[150px]" />
-                      </div>
-                    </div>
-                  ))}
+              {!cartItemData && (
+                <div className="p-[15px] flex gap-4 w-full items-start">
+                  <Skeleton className="w-1/6 aspect-square rounded" />
+                  <div className="grow space-y-2">
+                    <Skeleton className="h-5 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <Skeleton className="h-8 w-full" />
+                  </div>
                 </div>
               )}
 
               {/* empty  */}
-              {!isLoading && (!cartItemLocal || cartItemLocal.length === 0) && (
+              {cartItemData && cartItemData.length === 0 && (
                 <div className="empty w-full h-full relative">
                   <div className="aspect-square w-full relative">
                     <Image
@@ -135,85 +143,85 @@ const Cart = () => {
               )}
 
               {/* has item  */}
-              {!isLoading && cartItemLocal && cartItemLocal.length > 0 && (
+              {cartItemData && cartItemData.length > 0 && (
                 <>
-                  <ScrollArea className=" grow min-h-0 overflow-auto">
-                    {cartItemLocal.map((item) => (
+                  <ScrollArea className="grow min-h-0 overflow-auto">
+                    {cartItemData.map((item) => (
                       <div
-                        key={item.sku}
-                        className="cart-item p-[15px] flex gap-4 w-full items-start"
+                        key={item?.sku}
+                        className="cart-item p-[15px] flex gap-4 w-full items-start border-b border-gray-100"
                       >
-                        <div className="shrink-0 w-1/6 relative">
+                        <div className="shrink-0 w-1/6 relative aspect-square">
                           <Image
-                            className="w-full h-auto"
-                            src={`/`}
-                            alt={item.sku}
-                            width={0}
-                            height={0}
+                            className="w-full h-auto rounded object-cover"
+                            src={`/image/products/${item?.image}`}
+                            alt={item?.name || "Product Image"}
+                            width={100}
+                            height={100}
                             sizes="(max-width: 768px) 100vw, 16.666667vw"
                           />
                         </div>
                         <div className="grow">
-                          <div className=" flex gap-10">
-                            <div>
-                              <h1 className="uppercase font-semibold">
-                                {item.sku}
+                          <div className="flex justify-between">
+                            <div className="flex-1 pr-2">
+                              <h1 className="uppercase font-semibold text-sm">
+                                {item?.name}
                               </h1>
-                              <span>
-                                {item.sku} / {item.sku}
+                              <span className="text-gray-500 text-xs block mt-1">
+                                {item?.color} / {item?.size}
                               </span>
                             </div>
-                            <div className="">
+                            <div>
                               <Button
                                 size={"icon"}
                                 variant={"ghost"}
                                 onClick={() => {
-                                  removeFromCart(item.sku);
+                                  removeFromCart(item?.sku || "");
                                 }}
                               >
                                 <X className="w-4 h-4" />
                               </Button>
                             </div>
                           </div>
-                          <div className="flex justify-between">
+                          <div className="flex justify-between mt-3">
                             <div className="flex">
                               <Button
                                 size={"icon"}
                                 variant={"ghost"}
                                 onClick={() => {
-                                  decreaseQuantity(item.sku);
+                                  decreaseQuantity(item?.sku || "");
                                 }}
                               >
                                 <Minus className="w-4 h-4" />
                               </Button>
                               <Input
                                 readOnly
-                                value={item.quantity}
+                                value={item?.quantity}
                                 className="inline-block w-16 text-center no-spinner"
                                 type={"number"}
-                              ></Input>
+                              />
                               <Button
                                 size={"icon"}
                                 variant={"ghost"}
                                 onClick={() => {
-                                  increaseQuantity(item.sku);
+                                  increaseQuantity(item?.sku || "");
                                 }}
                               >
                                 <Plus className="w-4 h-4" />
                               </Button>
                             </div>
-                            <div className="flex flex-col mr-[10px]">
-                              {item.sku && (
-                                <>
-                                  <span className="font-semibold">
+                            <div className="flex flex-col mr-[10px] text-right">
+                              <span className="font-semibold">
+                                {formatCurrencyVND(
+                                  item?.discountprice || item?.price
+                                )}
+                              </span>
+                              {item?.discountprice &&
+                                item.discountprice < item.price && (
+                                  <span className="line-through text-gray-400 text-sm">
+                                    {formatCurrencyVND(item.price)}
                                   </span>
-                                  <span className="line-through">
-                                  </span>
-                                </>
-                              )}
-                              {!item.sku && (
-                                <span>1</span>
-                              )}
+                                )}
                             </div>
                           </div>
                         </div>

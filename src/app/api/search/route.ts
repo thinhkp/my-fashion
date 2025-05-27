@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/services/prisma";
 import { countProductsByName, searchProductsByName } from "@/services/data";
+
+
 
 export async function GET(request: NextRequest) {
   try {

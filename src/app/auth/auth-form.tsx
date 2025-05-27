@@ -141,7 +141,7 @@ const AuthForm = ({ initialTab }: AuthFormProps) => {
   const handleTabChange = (tab: "login" | "register") => {
     setActiveTab(tab);
     // Thay đổi route
-    router.replace(`/account/${tab}`);
+    router.replace(`/auth/${tab}`);
   };
 
   // Handle form submissions

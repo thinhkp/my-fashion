@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleAlert, User } from "lucide-react";
+import { CircleAlert, Clipboard, ClipboardCheck, LogOut, User } from "lucide-react";
 import React, { useState } from "react";
 import { PopoverTrigger, Popover, PopoverContent } from "./ui/popover";
 import { Separator } from "./ui/separator";
@@ -11,12 +11,13 @@ import axios from "axios";
 import { toast } from "sonner";
 import { Alert, AlertTitle } from "./ui/alert";
 import useUserInfo from "@/hooks/use-userinfo";
+import Link from "next/link";
 
 type UserProps = {
   allowOpen?: boolean;
-}
+};
 
-const UserC = ({allowOpen} : UserProps) => {
+const UserC = ({ allowOpen }: UserProps) => {
   const [open, setOpen] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -24,9 +25,12 @@ const UserC = ({allowOpen} : UserProps) => {
 
   const { data, refetch } = useUserInfo();
 
-  const user:
-    | { userId: string; displayname: string; roles: string[] }
-    | undefined = data?.user;
+  const user = data?.user
+
+  console.log("user", user);
+  
+
+   
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
@@ -35,7 +39,7 @@ const UserC = ({allowOpen} : UserProps) => {
     },
     onSuccess: (data) => {
       toast.success("Đăng nhập thành công");
-      refetch()
+      refetch();
     },
     onError: (error) => {
       setError("Sai tài khoản hoặc mật khẩu");
@@ -69,7 +73,9 @@ const UserC = ({allowOpen} : UserProps) => {
   return (
     <Popover open={allowOpen && open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <User />
+        <div className="">
+          <User />
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-85">
         <>
@@ -115,11 +121,11 @@ const UserC = ({allowOpen} : UserProps) => {
             </div>
           )}
           {user && (
-            <div className="text-center p-6 bg-white">
+            <div className="text-center  bg-white">
               <div className="flex flex-col items-center gap-3">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                   <span className="text-2xl text-green-500 font-bold">
-                    {user.displayname.charAt(0).toUpperCase()}
+                    {user?.displayname?.charAt(0).toUpperCase()}
                   </span>
                 </div>
 
@@ -127,32 +133,40 @@ const UserC = ({allowOpen} : UserProps) => {
                   Xin chào, {user.displayname}!
                 </h1>
 
-                <div className="mb-2">
-                  <p className="text-gray-600">ID: {user.userId}</p>
-                  <div className="flex flex-wrap gap-1 justify-center mt-2">
-                    {user.roles.map((role, index) => (
-                      <span
-                        key={index}
-                        className="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-full"
-                      >
-                        {role}
-                      </span>
-                    ))}
-                  </div>
+                <div className="grid grid-cols-1 gap-0 w-full">
+                  {/* thông tin cá nhân */}
+                  <Button
+                    variant="ghost"
+                    className="mt-4 text-red-500 h-auto p-2 border-red-200 hover:bg-red-50 hover:text-red-600 w-full m-0"
+                  >
+                    <Link href="/user/profile" className="w-full flex items-center font-bold text-black justify-between gap-2">
+                      <User className="size-5 p-2 box-content bg-gray-200 rounded-full " />
+                      <span className="grow text-left ">Thông tin cá nhân</span>
+                    </Link>
+                  </Button>
+                  {/* đơn hàng */}
+                  <Button
+                    variant="ghost"
+                    className="mt-4 text-red-500 h-auto p-2 border-red-200 hover:bg-red-50 hover:text-red-600 w-full m-0"
+                  >
+                    <Link href="/user/orders" className="w-full flex items-center font-bold text-black justify-between gap-2">
+                      <ClipboardCheck className="size-5 p-2 box-content bg-gray-200 rounded-full " />
+                      <span className="grow text-left ">Đơn hàng</span>
+                    </Link>
+                  </Button>
+                  {/* đăng xuất */}
+                  <Button
+                    variant="ghost"
+                    onClick={handleLogout}
+                    disabled={logoutMutation.isPending}
+                    className="mt-4 text-red-500 h-auto p-2 border-red-200 hover:bg-red-50 hover:text-red-600 w-full m-0"
+                  >
+                    <div className="w-full flex items-center font-bold text-black justify-between gap-2">
+                      <LogOut className="size-5 p-2 box-content bg-gray-200 rounded-full " />
+                      <span className="grow text-left ">{logoutMutation.isPending ? "Đang xử lý..." : "Đăng xuất"}</span>
+                    </div>
+                  </Button>
                 </div>
-
-                <p className="text-sm text-gray-500 mt-4">
-                  Đăng nhập lúc: {new Date().toLocaleTimeString()}
-                </p>
-
-                <Button
-                  variant="outline"
-                  onClick={handleLogout}
-                  disabled={logoutMutation.isPending}
-                  className="mt-4 text-red-500 border-red-200 hover:bg-red-50 hover:text-red-600 w-full"
-                >
-                  {logoutMutation.isPending ? "Đang xử lý..." : "Đăng xuất"}
-                </Button>
               </div>
             </div>
           )}

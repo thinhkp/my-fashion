@@ -4,7 +4,7 @@ import { z } from "zod";
 import { hasManageAccess } from "@/utils/verify-token";
 import { COOKIE_NAME } from "@/config/cookie";
 
-// Define the schema for order validation
+// Updated schema to match frontend data
 const orderSchema = z.object({
   orderer: z.object({ userId: z.string().nullable().optional() }),
   receiver: z.object({
@@ -23,7 +23,6 @@ const orderSchema = z.object({
     z.object({
       sku: z.string(),
       quantity: z.number().min(1, "Quantity must be at least 1"),
-      price: z.number().min(0, "Price must be a positive number"),
     })
   ),
   shippingMethod: z.string(),
@@ -32,10 +31,9 @@ const orderSchema = z.object({
 
 export async function GET(request: NextRequest) {
   try {
-    
     if (!(await hasManageAccess(request, COOKIE_NAME)))
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    
+
     const url = new URL(request.url);
     const status = url.searchParams.get("status");
     const limit = parseInt(url.searchParams.get("limit") || "100");
@@ -117,72 +115,126 @@ export async function POST(request: Request) {
     console.log("Request body:", body);
 
     const parsedData = orderSchema.parse(body);
-    console.log(parsedData);
+    console.log("Parsed data:", parsedData);
+
+    // Calculate shipping fee based on total price
+    let totalPrice = 0;
+    const orderItems = [];
 
     // Check if all products exist and have enough stock
     for (const item of parsedData.items) {
-      const product = await prisma.productvariant.findFirst({
+      const variant = await prisma.productvariant.findFirst({
         where: {
-          AND: {
-            sku: item.sku,
-            stockquantity: {
-              gte: item.quantity,
-            },
-          },
+          sku: item.sku,
         },
+        include: { product: true },
       });
 
-      if (!product) {
+      if (!variant) {
         return NextResponse.json(
-          { success: false, message: `Product with SKU ${item.sku} not found` },
+          {
+            success: false,
+            message: `Product with SKU ${item.sku} not found or out of stock`,
+          },
           { status: 404 }
         );
       }
+
+      if (variant.stockquantity < item.quantity) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Not enough stock for product ${
+              variant.product.name || "Unknown"
+            } (${item.sku})`,
+          },
+          { status: 400 }
+        );
+      }
+
+      // Calculate the item price (using discountprice if available)
+      const itemPrice =
+        variant.product.discountprice !== null &&
+        variant.product.discountprice !== undefined
+          ? variant.product.discountprice + (variant.additionalprice || 0)
+          : variant.product.price + (variant.additionalprice || 0);
+
+      // Add to total price
+      totalPrice += itemPrice * item.quantity;
+
+      // Prepare order item data
+      orderItems.push({
+        productId: variant.product.id,
+        variantId: variant.id,
+        quantity: item.quantity,
+        price: itemPrice,
+      });
     }
+
+    // Calculate shipping fee (free if order is over 500,000)
+    const shippingThreshold = 500000;
+    const standardShippingFee = 30000;
+    const shippingFee =
+      totalPrice >= shippingThreshold ? 0 : standardShippingFee;
+
+    // Add shipping fee to total
+    const finalTotal = totalPrice + shippingFee;
 
     // Create a new order in the database
     const newOrder = await prisma.order.create({
       data: {
-        userId: parsedData.orderer.userId || null, // Assuming user is not logged in
-        totalPrice: parsedData.items.reduce(
-          (sum, item) => sum + item.price * item.quantity,
-          0
-        ),
-        shippingFee: 0, // Assuming free shipping for now
+        userId: parsedData.orderer.userId || null,
+        totalPrice: finalTotal,
+        shippingFee: shippingFee,
         recipientName: parsedData.receiver.name,
         phone: parsedData.receiver.phone,
+        paymentMethod: parsedData.paymentMethod,
         address:
           parsedData.receiver.address +
           `, ${parsedData.receiver.ward}, ${parsedData.receiver.district}, ${parsedData.receiver.province}`,
         items: {
-          create: await Promise.all(
-            parsedData.items.map(async (item) => {
-              const variant = await prisma.productvariant.findFirst({
-                where: { sku: item.sku },
-                include: { product: true },
-              });
-              return {
-                variantId: variant!.id,
-                productId: variant!.product!.id,
-                quantity: item.quantity,
-                price: item.price,
-              };
-            })
-          ),
+          create: orderItems,
         },
+        status: 0, // Initial status: Pending
+        paymentStatus: 0, // Initial payment status: Unpaid
       },
       include: {
         items: true,
       },
     });
 
+    // Update stock quantities
+    for (const item of parsedData.items) {
+      // Find the variant by SKU to get its unique ID
+      const variant = await prisma.productvariant.findFirst({
+        where: { sku: item.sku },
+        select: { id: true },
+      });
+      if (variant) {
+        await prisma.productvariant.update({
+          where: { id: variant.id },
+          data: {
+            stockquantity: {
+              decrement: item.quantity,
+            },
+          },
+        });
+      }
+    }
+
     return NextResponse.json(
-      { success: true, message: "Order created successfully" },
+      {
+        success: true,
+        message: "Order created successfully",
+        orderId: newOrder.id,
+        order: newOrder,
+      },
       { status: 201 }
     );
   } catch (error: any) {
     console.error("Order creation error:", error);
 
+    // Handle validation errors
     if (error.name === "ZodError") {
       return NextResponse.json(
         { success: false, message: "Validation error", details: error.errors },
@@ -190,10 +242,22 @@ export async function POST(request: Request) {
       );
     }
 
+    // Handle Prisma errors
+    if (error.code) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Database error",
+          error: error.message,
+        },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
       {
         success: false,
-        message: error.message + "An error occurred while creating the order",
+        message: error.message || "An error occurred while creating the order",
       },
       { status: 500 }
     );
