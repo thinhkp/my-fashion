@@ -1,6 +1,6 @@
-import { Prisma } from "@/generated/prisma";
 import { prisma } from "@/services/prisma";
 import { Category, Product } from "@/types/model";
+import { Prisma } from "@prisma/client";
 import { unstable_cache } from "next/cache";
 
 export async function getProductBySlug(slug: string) {
@@ -408,7 +408,7 @@ export const getAllColors = unstable_cache(
   { revalidate: 3600 }
 );
 
-export async function searchProducts({
+export async function getProductIdsByQuery({
   sizes,
   colors,
   minPrice,
@@ -420,13 +420,14 @@ export async function searchProducts({
   minPrice: number;
   maxPrice: number;
   categorySlug?: string;
-}): Promise<Product[]> {
+}): Promise<number[]> {
   // Build the where clause for prisma query
   let where: any = {
     price: {
       gte: minPrice,
       lte: maxPrice,
     },
+    status: 1, // Ensure we only get active products
   };
 
   // Add size and color filters if provided
@@ -461,8 +462,29 @@ export async function searchProducts({
     };
   }
 
-  return await prisma.product.findMany({
+  // Only select the product IDs
+  const products = await prisma.product.findMany({
     where,
+    select: {
+      id: true,
+    },
+  });
+
+  // Return an array of product IDs
+  return products.map((product) => product.id);
+}
+
+// Create a new function to get products by IDs
+export async function getProductsByIds(
+  productIds: number[]
+): Promise<Product[]> {
+  if (!productIds.length) return [];
+
+  return await prisma.product.findMany({
+    where: {
+      id: { in: productIds },
+      status: 1,
+    },
     include: {
       productimage: true,
       productcategory: {
@@ -494,7 +516,7 @@ export async function getUserByUsername<T extends Prisma.userInclude = {}>(
 ): Promise<any> {
   return await prisma.user.findFirst({
     where: { username },
-    ...(options?.include ? { include: options.include } : {})
+    ...(options?.include ? { include: options.include } : {}),
   });
 }
 
@@ -504,6 +526,6 @@ export async function getUserById<T extends Prisma.userInclude = {}>(
 ): Promise<any> {
   return await prisma.user.findFirst({
     where: { userId: userId },
-    ...(options?.include ? { include: options.include } : {})
+    ...(options?.include ? { include: options.include } : {}),
   });
 }

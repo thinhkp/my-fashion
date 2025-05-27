@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -10,7 +9,7 @@ datasource db {
 
 model category {
   id               Int               @id @default(autoincrement())
-  name             String            @db.VarChar(100)
+  name            String            @db.VarChar(100)
   description      String?
   categorystatus   Int               @db.SmallInt
   image            String?
@@ -98,6 +97,9 @@ model user {
   password     String
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @updatedAt
+
+  address      String?     @default("")
+  phone        String?     @default("")
 
   userRoles    UserRole[]
   orders       order[]
