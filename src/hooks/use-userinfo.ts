@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
-type UserInfoRes = {
-  user: UserInfo;
-};
+
 
 type UserInfo = {
   userId?: string;
@@ -20,8 +18,8 @@ export default function useUserInfo() {
     queryFn: async () => {
       try {
         const response = await axios.get("/api/auth/me");
-        return response.data as UserInfoRes;
-      } catch (error) {
+        return response.data.user as UserInfo;
+      } catch  {
         return null;
       }
     },

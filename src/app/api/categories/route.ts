@@ -5,14 +5,23 @@ export async function GET() {
   try {
     const categories = await prisma.category.findMany({
       orderBy: {
-        name: 'asc',
+        name: "asc",
       },
       where: {
         categorystatus: 1, // Active categories
       },
     });
 
-    return NextResponse.json(categories);
+    // Enhance response with full image URLs
+    const categoriesWithImageUrls = categories.map((category) => ({
+      ...category,
+      imageUrl: category.image ? `/image/categories/${category.image}` : null,
+    }));
+
+    return NextResponse.json({
+      categories: categoriesWithImageUrls,
+      count: categories.length,
+    });
   } catch (error) {
     console.error("Error fetching categories:", error);
     return NextResponse.json(

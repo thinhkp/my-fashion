@@ -47,13 +47,13 @@ type UserProfileFormValues = z.infer<typeof userProfileSchema>;
 
 // Function to update user profile
 const updateProfile = async (data: UserProfileFormValues) => {
-  const response = await axios.put("/api/auth/me", data);
+  const response = await axios.patch("/api/auth/me", data);
   return response.data;
 };
 
 export default function EditProfilePage() {
   const router = useRouter();
-  const { data: userData, isLoading, error, refetch } = useUserInfo();
+  const { data: userData, isLoading, refetch } = useUserInfo();
 
   // Set up the form
   const form = useForm<UserProfileFormValues>({
@@ -67,11 +67,11 @@ export default function EditProfilePage() {
 
   // Update form when user data is loaded
   useEffect(() => {
-    if (userData?.user) {
+    if (userData) {
       form.reset({
-        displayname: userData.user.displayname || "",
-        phone: userData.user.phone || "",
-        address: userData.user.address || "",
+        displayname: userData.displayname || "",
+        phone: userData.phone || "",
+        address: userData.address || "",
       });
     }
   }, [userData, form]);
@@ -99,7 +99,7 @@ export default function EditProfilePage() {
     return <EditProfileSkeleton />;
   }
 
-  if (!userData?.user) {
+  if (!userData) {
     return (
       <div className="text-center py-10">
         <p className="text-gray-500">
@@ -143,7 +143,7 @@ export default function EditProfilePage() {
                 Email
               </label>
               <Input
-                value={userData.user.email || ""}
+                value={userData.email || ""}
                 disabled
                 className="bg-gray-50"
               />

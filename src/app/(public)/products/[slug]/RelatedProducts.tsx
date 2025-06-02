@@ -37,6 +37,7 @@ const RelatedProducts = async ({ productId, limit }: Props) => {
               // Transform item.productvariant to match ProductCard's expected type
               const transformedItem = {
                 ...item,
+                //eslint-disable-next-line 
                 productvariant: item.productvariant.map((variant: any) => ({
                   ...variant,
                   image: variant.image ?? null,

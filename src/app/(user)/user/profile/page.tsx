@@ -10,13 +10,13 @@ import Link from "next/link";
 
 export default function UserProfilePage() {
   const router = useRouter();
-  const { data: userData, isLoading, error } = useUserInfo();
+  const { data: user, isLoading } = useUserInfo();
 
   if (isLoading) {
     return <UserProfileSkeleton />;
   }
 
-  if (!userData?.user) {
+  if (!user) {
     return (
       <div className="text-center py-10">
         <p className="text-gray-500">
@@ -29,7 +29,7 @@ export default function UserProfilePage() {
     );
   }
 
-  const user = userData.user;
+ 
 
   return (
     <div>
@@ -90,7 +90,7 @@ export default function UserProfilePage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 py-2">
               <div className="text-sm font-medium text-gray-500">Vai trò</div>
               <div className="sm:col-span-2">
-                {user.roles?.map((role, index) => (
+                {user.roles?.map((role) => (
                   <span
                     key={role}
                     className="inline-flex items-center rounded-full bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 mr-2"

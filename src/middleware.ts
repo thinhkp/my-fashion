@@ -1,20 +1,29 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextRequest, NextResponse } from "next/server";
 
-import {adminAuthMiddleware} from '@/middleware/admin-access'
- 
-// This function can be marked `async` if using `await` inside
-export  async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+  const { cookies } = request;
+  const sessionId = cookies.get("sessionId")?.value;
 
-const res = await adminAuthMiddleware(request)
-if(res !== NextResponse.next()) return res
+  // Protected routes that require authentication
+  const protectedRoutes = ["/account", "/checkout", "/admin"];
 
+  // Check if the route is protected and there's no session
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    pathname.startsWith(route)
+  );
 
+  if (isProtectedRoute && !sessionId) {
+    // Create the login URL with the current path as the returnUrl
+    const url = new URL("/auth/login", request.url);
+    url.searchParams.set("returnUrl", pathname);
 
-  return NextResponse.next()
+    return NextResponse.redirect(url);
+  }
+
+  return NextResponse.next();
 }
- 
-// See "Matching Paths" below to learn more
+
 export const config = {
-  matcher: '/admin/:path*', // Áp dụng middleware cho tất cả các route con của /admin
+  matcher: ["/account/:path*", "/checkout/:path*", "/admin/:path*"],
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { formatCurrencyVND } from "@/utils/format";
-import { Product, ProductWithRelations } from "@/types/model";
+import { Product } from "@/types/model";
 import { Input } from "@/components/ui/input";
 import {
   Truck,
@@ -63,6 +63,7 @@ const ProductDetail = ({ product }: Props) => {
   const [color, setColor] = useState(colors[0]);
   const [selectedType, setSelectedType] = useState("color");
   const [api, setApi] = useState<CarouselApi>();
+  // eslint-disable-next-line
   const [api2, setApi2] = useState<CarouselApi>();
   const [currentImage, setCurrentImage] = useState(0);
 

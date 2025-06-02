@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, {  useState } from "react";
 import { useDebounce } from "use-debounce";
 import {
   Drawer,
@@ -11,7 +11,7 @@ import {
   DrawerTrigger,
 } from "./ui/drawer";
 
-import { Search as SearchI, SearchIcon, X } from "lucide-react";
+import { Search as SearchI, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Input } from "./ui/input";

@@ -3,13 +3,13 @@ import { prisma } from "@/services/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 interface Props {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
-export async function GET(request: NextRequest, context : Props) {
+export async function GET(request: NextRequest, context: Props) {
   try {
-    const { params } = await context;
-    const { slug } = await params;
+    const params = await context.params;
+    const { slug } = params;
 
     if (!slug) {
       return NextResponse.json(
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest, context : Props) {
       );
     }
 
-    const products = await getProductsByCategorySlug(cate.slug || "")
+    const products = await getProductsByCategorySlug(cate.slug || "");
 
     if (!products.length) {
       return NextResponse.json(

@@ -422,7 +422,8 @@ export async function getProductIdsByQuery({
   categorySlug?: string;
 }): Promise<number[]> {
   // Build the where clause for prisma query
-  let where: any = {
+  // eslint-disable-next-line
+  const where: any = {
     price: {
       gte: minPrice,
       lte: maxPrice,
@@ -510,20 +511,22 @@ export async function getProductsByIds(
   });
 }
 
-export async function getUserByUsername<T extends Prisma.userInclude = {}>(
+export async function getUserByUsername<T extends Prisma.userInclude>(
   username: string,
   options?: { include?: T }
-): Promise<any> {
+): // eslint-disable-next-line
+Promise<any> {
   return await prisma.user.findFirst({
     where: { username },
     ...(options?.include ? { include: options.include } : {}),
   });
 }
 
-export async function getUserById<T extends Prisma.userInclude = {}>(
+export async function getUserById<T extends Prisma.userInclude>(
   userId: string,
   options?: { include?: T }
-): Promise<any> {
+): // eslint-disable-next-line
+Promise<any> {
   return await prisma.user.findFirst({
     where: { userId: userId },
     ...(options?.include ? { include: options.include } : {}),

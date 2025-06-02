@@ -7,8 +7,9 @@ import { ProductWithRelations } from "@/types/model";
 import { notFound } from "next/navigation";
 import React from "react";
 
-const page = async ({ params }: { params: { slug: string } }) => {
-  const { slug } = await params;
+const page = async ({ params }: { params: Promise<{ slug: string }> }) => {
+  const resolvedParams = await params;
+  const { slug } = resolvedParams;
 
   const product: ProductWithRelations = await getProductBySlug(slug);
 

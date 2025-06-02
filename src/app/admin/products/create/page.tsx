@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, Controller, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import axios from "axios";
+import Image from "next/image";
 
 // Types based on your Prisma schema
 type Category = {
@@ -173,36 +174,6 @@ export default function CreateProduct() {
     setUploadedImages(updatedImages);
   };
 
-  // Move an image up in the order
-  const moveImageUp = (index: number) => {
-    if (index <= 0) return;
-
-    const updatedImages = [...uploadedImages];
-    const temp = updatedImages[index].displayorder;
-    updatedImages[index].displayorder = updatedImages[index - 1].displayorder;
-    updatedImages[index - 1].displayorder = temp;
-
-    // Sort by display order
-    updatedImages.sort((a, b) => a.displayorder - b.displayorder);
-
-    setUploadedImages(updatedImages);
-  };
-
-  // Move an image down in the order
-  const moveImageDown = (index: number) => {
-    if (index >= uploadedImages.length - 1) return;
-
-    const updatedImages = [...uploadedImages];
-    const temp = updatedImages[index].displayorder;
-    updatedImages[index].displayorder = updatedImages[index + 1].displayorder;
-    updatedImages[index + 1].displayorder = temp;
-
-    // Sort by display order
-    updatedImages.sort((a, b) => a.displayorder - b.displayorder);
-
-    setUploadedImages(updatedImages);
-  };
-
   const addVariant = () => {
     appendVariant({
       colorid: "",
@@ -247,7 +218,7 @@ export default function CreateProduct() {
       const formData = new FormData();
 
       // Add all images to formData
-      uploadedImages.forEach((img, index) => {
+      uploadedImages.forEach((img) => {
         formData.append(`images`, img.file);
         formData.append(`displayorders`, img.displayorder.toString());
       });
@@ -262,7 +233,7 @@ export default function CreateProduct() {
       );
 
       // Submit to API using axios
-      const response = await axios.post("/api/products", formData, {
+      await axios.post("/api/products", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -579,10 +550,13 @@ export default function CreateProduct() {
                 onDrop={(e) => handleDrop(e, index)}
                 onDragEnd={handleDragEnd}
               >
-                <img
+                {/*  */}
+                <Image
                   src={image.preview}
                   alt={`Preview ${index}`}
-                  className="w-full h-40 object-cover rounded-md"
+                  width={300} // Kích thước cố định
+                  height={200}
+                  className="object-cover w-75 h-50  rounded-md"
                 />
                 <div className="absolute top-1 right-1 flex">
                   <button
@@ -651,7 +625,7 @@ export default function CreateProduct() {
 
           {variantFields.length === 0 && (
             <p className="text-gray-500 mb-4">
-              No variants added yet. Click "Add Variant" to create variations of
+              No variants added yet. Click &quot;Add Variant&quot; to create variations of
               this product.
             </p>
           )}

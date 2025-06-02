@@ -1,6 +1,5 @@
 import { prisma } from "@/services/prisma";
 import CateWithProductsView from "./CateWithProductsView";
-import { category, product } from "@/generated/prisma";
 import { getProductsByCategorySlug } from "@/services/data";
 import { Product } from "@/types/model";
 

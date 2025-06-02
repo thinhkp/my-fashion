@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useForm, useFieldArray } from "react-hook-form";
 import axios from "axios";
+import Image from "next/image";
 
 // Types based on your Prisma schema
 type Category = {
@@ -269,32 +270,9 @@ export default function UpdateProduct() {
     setUploadedImages(updatedImages);
   };
 
-  // Move an image up/down in the order
-  const moveImageUp = (index: number) => {
-    if (index <= 0) return;
-
-    const updatedImages = [...uploadedImages];
-    const temp = updatedImages[index].displayorder;
-    updatedImages[index].displayorder = updatedImages[index - 1].displayorder;
-    updatedImages[index - 1].displayorder = temp;
-
-    // Sort by display order
-    updatedImages.sort((a, b) => a.displayorder - b.displayorder);
-    setUploadedImages(updatedImages);
-  };
-
-  const moveImageDown = (index: number) => {
-    if (index >= uploadedImages.length - 1) return;
-
-    const updatedImages = [...uploadedImages];
-    const temp = updatedImages[index].displayorder;
-    updatedImages[index].displayorder = updatedImages[index + 1].displayorder;
-    updatedImages[index + 1].displayorder = temp;
-
-    // Sort by display order
-    updatedImages.sort((a, b) => a.displayorder - b.displayorder);
-    setUploadedImages(updatedImages);
-  };
+  
+  
+  
 
   const addVariant = () => {
     appendVariant({
@@ -342,7 +320,7 @@ export default function UpdateProduct() {
       const formData = new FormData();
 
       // Add existing images info to formData
-      uploadedImages.forEach((img, index) => {
+      uploadedImages.forEach((img) => {
         if (img.isExisting) {
           // For existing images, just update the displayorder
           formData.append(`existingImageIds`, img.id!.toString());
@@ -375,7 +353,7 @@ export default function UpdateProduct() {
       );
 
       // Submit to API using axios
-      const response = await axios.put(
+       await axios.put(
         `/api/products/${product.id}`,
         formData,
         {
@@ -721,10 +699,12 @@ export default function UpdateProduct() {
                 onDrop={(e) => handleDrop(e, index)}
                 onDragEnd={handleDragEnd}
               >
-                <img
+                <Image
                   src={image.preview}
                   alt={`Preview ${index}`}
-                  className="w-full h-40 object-cover rounded-md"
+                  width={300}
+                  height={200}
+                  className="w-full h-auto object-cover rounded-md"
                 />
                 <div className="absolute top-1 right-1 flex">
                   <button
@@ -794,7 +774,7 @@ export default function UpdateProduct() {
 
           {variantFields.length === 0 && (
             <p className="text-gray-500 mb-4">
-              No variants added yet. Click "Add Variant" to create variations of
+              No variants added yet. &quot;Click Add Variant&quot; to create variations of
               this product.
             </p>
           )}

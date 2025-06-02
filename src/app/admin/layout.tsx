@@ -1,30 +1,40 @@
 "use client";
 
-import { useState, ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
+import {  useState } from "react";
 import {
-  Settings,
-  Users,
   ShoppingBag,
-  Layers,
   FileText,
-  Tag,
   BarChart2,
+  Layers,
   Menu,
+  Settings,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 
-interface AdminLayoutProps {
-  children: ReactNode;
-  activeMenu: string;
-}
-
-export default function AdminLayout({
-  children,
-  activeMenu,
-}: AdminLayoutProps) {
+export default function AdminPage({ children }: { children: React.ReactNode }) {
+  
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const pathname = usePathname();
+
+  // Toggle sidebar for mobile
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  // Helper function to determine if a menu item is active
+  const isActive = (href: string) => {
+    if (href === "/admin" && pathname === "/admin") {
+      return true;
+    }
+    if (href !== "/admin" && pathname.startsWith(href)) {
+      return true;
+    }
+    return false;
+  };
 
   const menuItems = [
     {
@@ -51,18 +61,7 @@ export default function AdminLayout({
       icon: <FileText className="w-5 h-5 mr-2" />,
       href: "/admin/orders",
     },
-    {
-      id: "customers",
-      name: "Khách hàng",
-      icon: <Users className="w-5 h-5 mr-2" />,
-      href: "/admin/customers",
-    },
-    {
-      id: "promotions",
-      name: "Khuyến mãi",
-      icon: <Tag className="w-5 h-5 mr-2" />,
-      href: "/admin/promotions",
-    },
+    
     {
       id: "settings",
       name: "Cài đặt",
@@ -71,17 +70,16 @@ export default function AdminLayout({
     },
   ];
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-gray-100">
       {/* Mobile header */}
       <div className="lg:hidden bg-white p-4 flex justify-between items-center shadow-sm">
-        <h1 className="text-lg font-bold text-blue-600 flex items-center">
-          <Settings className="mr-2" /> Quản trị
-        </h1>
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center mr-2">
+            <Image src="/logo.png" alt="Logo" width={32} height={32} />
+          </Link>
+          <span className="text-lg font-bold text-blue-600">Quản trị</span>
+        </div>
         <Button variant="ghost" size="icon" onClick={toggleSidebar}>
           <Menu className="h-5 w-5" />
         </Button>
@@ -99,10 +97,17 @@ export default function AdminLayout({
       <div className="lg:block lg:w-64 hidden">
         <div className="sticky top-0 left-0 h-screen overflow-y-auto">
           <div className="w-full h-full bg-white shadow-md flex flex-col">
-            <div className="p-4 border-b flex justify-between items-center">
-              <h1 className="text-xl font-bold text-blue-600 flex items-center">
-                <Settings className="mr-2" /> Quản trị
-              </h1>
+            <div className="p-4 border-b flex flex-col gap-5 items-center">
+              <Link href="/" className=" flex items-center mr-2 w-40">
+                <Image
+                  src="/image/logo.webp"
+                  alt="Logo"
+                  width={1000}
+                  height={600}
+                  className="w-full h-auto"
+                />
+              </Link>
+              <span className="text-xl font-bold text-blue-600">Quản trị</span>
             </div>
             <nav className="p-2 overflow-y-auto flex-grow">
               <ul className="space-y-1">
@@ -111,10 +116,13 @@ export default function AdminLayout({
                     <Link
                       href={item.href}
                       className={`flex items-center p-3 rounded-lg hover:bg-blue-50 ${
-                        activeMenu === item.id
+                        isActive(item.href)
                           ? "bg-blue-100 text-blue-600 font-medium"
                           : ""
                       }`}
+                      onClick={() => {
+                        setSidebarOpen(false); // Close sidebar on mobile after navigation
+                      }}
                     >
                       {item.icon}
                       {item.name}
@@ -136,9 +144,12 @@ export default function AdminLayout({
       >
         <div className="w-full h-full flex flex-col">
           <div className="p-4 border-b flex justify-between items-center">
-            <h1 className="text-xl font-bold text-blue-600 flex items-center">
-              <Settings className="mr-2" /> Quản trị
-            </h1>
+            <div className="flex items-center">
+              <Link href="/" className="flex items-center mr-2">
+                <Image src="/logo.png" alt="Logo" width={32} height={32} />
+              </Link>
+              <span className="text-xl font-bold text-blue-600">Quản trị</span>
+            </div>
             <Button
               variant="ghost"
               size="icon"
@@ -155,11 +166,13 @@ export default function AdminLayout({
                   <Link
                     href={item.href}
                     className={`flex items-center p-3 rounded-lg hover:bg-blue-50 ${
-                      activeMenu === item.id
+                      isActive(item.href)
                         ? "bg-blue-100 text-blue-600 font-medium"
                         : ""
                     }`}
-                    onClick={() => setSidebarOpen(false)}
+                    onClick={() => {
+                      setSidebarOpen(false); // Close sidebar on mobile after navigation
+                    }}
                   >
                     {item.icon}
                     {item.name}
@@ -172,7 +185,9 @@ export default function AdminLayout({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 p-4 md:p-6 lg:p-8 pt-4 lg:ml-0">{children}</div>
+      <div className="flex-1 p-3 sm:p-4 md:p-6 lg:p-8 overflow-x-auto">
+        <div className="max-w-full mx-auto">{children}</div>
+      </div>
     </div>
   );
 }

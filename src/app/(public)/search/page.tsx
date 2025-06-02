@@ -16,14 +16,13 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { number } from "zod";
 
 type PageProps = {
-  searchParams: {
+  searchParams: Promise<{
     q: string;
     page: number;
     limit: number;
-  };
+  }>;
 };
 
 const createPageUrl = (
@@ -44,7 +43,8 @@ const createPageUrl = (
 };
 
 const Page = async ({ searchParams }: PageProps) => {
-  const { q, page: pageStr = 1, limit: limitStr = 10 } = searchParams;
+  const resolvedSearchParams = await searchParams;
+  const { q, page: pageStr = 1, limit: limitStr = 10 } = resolvedSearchParams;
 
   // lỗi runtime cast lại thành number
   const page = Number(pageStr);
@@ -64,7 +64,7 @@ const Page = async ({ searchParams }: PageProps) => {
   const leftIndex = page - itemPerSide;
   const rightIndex = page + itemPerSide;
 
-  const isFarFromLastPage = totalPages - page > itemPerSide ;
+  const isFarFromLastPage = totalPages - page > itemPerSide;
 
   for (let index = 1; index <= totalPages; index++) {
     if (index >= leftIndex && index <= rightIndex) {
@@ -94,7 +94,9 @@ const Page = async ({ searchParams }: PageProps) => {
           <PaginationContent>
             {page != 1 && (
               <PaginationItem>
-                <PaginationPrevious href={createPageUrl(searchParams, page -1)} />
+                <PaginationPrevious
+                  href={createPageUrl(resolvedSearchParams, page - 1)}
+                />
               </PaginationItem>
             )}
 
@@ -104,7 +106,7 @@ const Page = async ({ searchParams }: PageProps) => {
                 <PaginationItem key={item}>
                   <PaginationLink
                     isActive={isActive}
-                    href={createPageUrl(searchParams, item)}
+                    href={createPageUrl(resolvedSearchParams, item)}
                   >
                     {item}
                   </PaginationLink>
@@ -114,15 +116,17 @@ const Page = async ({ searchParams }: PageProps) => {
 
             {isFarFromLastPage && (
               <>
-              <PaginationItem>
-                <PaginationEllipsis />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink href={createPageUrl(searchParams, totalPages)}>{totalPages}</PaginationLink>
-              </PaginationItem>
-
+                <PaginationItem>
+                  <PaginationEllipsis />
+                </PaginationItem>
+                <PaginationItem>
+                  <PaginationLink
+                    href={createPageUrl(resolvedSearchParams, totalPages)}
+                  >
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
               </>
-              
             )}
 
             {page != totalPages && (

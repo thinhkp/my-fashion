@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
-import axios, { Axios, AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import { toast } from "sonner";
 import useUserInfo from "@/hooks/use-userinfo";
 import {
@@ -54,7 +54,7 @@ const changePassword = async (data: PasswordChangeFormValues) => {
 
 export default function ChangePasswordPage() {
   const router = useRouter();
-  const { data: userData, isLoading } = useUserInfo();
+  const { data: user, isLoading } = useUserInfo();
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -101,7 +101,7 @@ export default function ChangePasswordPage() {
     return <ChangePasswordSkeleton />;
   }
 
-  if (!userData?.user) {
+  if (!user) {
     return (
       <div className="text-center py-10">
         <p className="text-gray-500">

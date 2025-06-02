@@ -4,7 +4,6 @@ import useUserInfo from "@/hooks/use-userinfo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Order } from "@/types/model";
 import { format } from "date-fns";
-import { OrderStatus } from "@/constants/order-status";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -18,7 +17,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { get } from "https";
 import { getOrderStatusColor, getOrderStatusLabel } from "@/utils/format-text";
 
 // Giao diện phản hồi API
@@ -27,9 +25,7 @@ interface OrdersResponse {
 }
 
 // Hàm để lấy nhãn trạng thái từ enum
-const getStatusLabel = (statusCode: number): string => {
-  return OrderStatus[statusCode] || "Không xác định";
-};
+
 
 // Hàm truy vấn để lấy đơn hàng - trả về Order[] thô từ API
 const fetchOrders = async (userId?: string): Promise<Order[]> => {
@@ -44,7 +40,7 @@ const fetchOrders = async (userId?: string): Promise<Order[]> => {
 
 export default function OrdersPage() {
   const {
-    data: userData,
+    data: user,
     isLoading: isLoadingUser,
     error: userError,
   } = useUserInfo();
@@ -53,47 +49,22 @@ export default function OrdersPage() {
   const {
     data: orders = [],
     isLoading: isLoadingOrders,
-    error: ordersError,
+   
   } = useQuery({
-    queryKey: ["orders", userData?.user?.userId],
-    queryFn: () => fetchOrders(userData?.user?.userId),
-    enabled: !!userData?.user?.userId, // Only run query when userId is available
+    queryKey: ["orders", user?.userId],
+    queryFn: () => fetchOrders(user?.userId),
+    enabled: !!user?.userId, // Only run query when userId is available
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
   // Status color mapping
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Pending":
-        return "bg-gray-100 text-gray-800";
-      case "Confirmed":
-        return "bg-blue-100 text-blue-800";
-      case "Processing":
-        return "bg-yellow-100 text-yellow-800";
-      case "ReadyToShip":
-        return "bg-indigo-100 text-indigo-800";
-      case "Shipping":
-        return "bg-purple-100 text-purple-800";
-      case "Delivered":
-        return "bg-green-100 text-green-800";
-      case "Completed":
-        return "bg-emerald-100 text-emerald-800";
-      case "Cancelled":
-        return "bg-red-100 text-red-800";
-      case "FailedDelivery":
-        return "bg-orange-100 text-orange-800";
-      case "Returned":
-        return "bg-amber-100 text-amber-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+ 
 
   if (isLoadingUser) {
     return <OrdersPageSkeleton />;
   }
 
-  if (userError || !userData) {
+  if (userError || !user) {
     return (
       <div className="container mx-auto p-6 max-w-4xl">
         <h1 className="text-2xl font-bold mb-6">Đơn hàng của tôi</h1>
@@ -106,7 +77,7 @@ export default function OrdersPage() {
     );
   }
 
-  const { user } = userData;
+ 
 
   return (
     <div className="container mx-auto p-2 sm:p-6 max-w-4xl">

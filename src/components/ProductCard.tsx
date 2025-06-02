@@ -8,15 +8,13 @@ import Link from "next/link";
 import { Button } from "./ui/button";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { Product, ProductCardType } from "@/types/model";
+import { Product } from "@/types/model";
 import { cn } from "@/lib/utils";
 import {
   Carousel,
   CarouselApi,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "./ui/carousel";
 import useCart from "@/hooks/use-cart";
 import { Input } from "./ui/input";
@@ -35,7 +33,7 @@ const ProductCard = ({ item }: ProductCardProps) => {
       productvariant
         .map((item) => item.color.name)
         .filter((item, i, a) => i == a.indexOf(item)),
-    [item]
+    [ productvariant]
   );
 
   const sizes = useMemo(
@@ -43,7 +41,7 @@ const ProductCard = ({ item }: ProductCardProps) => {
       productvariant
         .map((item) => item.size.name)
         .filter((item, i, a) => i == a.indexOf(item)),
-    [item]
+    [ productvariant]
   );
 
   const [quantity, setQuantity] = useState(1);
@@ -51,6 +49,8 @@ const ProductCard = ({ item }: ProductCardProps) => {
   const [color, setColor] = useState(colors[0]);
   const [selectedType, setSelectedType] = useState("color");
   const [api, setApi] = useState<CarouselApi>();
+
+  // eslint-disable-next-line
   const [api2, setApi2] = useState<CarouselApi>();
   const [currentImage, setCurrentImage] = useState(0);
   const { addToCart } = useCart();
@@ -108,14 +108,14 @@ const ProductCard = ({ item }: ProductCardProps) => {
     ) {
       setColor(availableColorsForSize[0]);
     }
-  }, [color, size]);
+  }, [color, size, selectedType, availableSizesForColor, availableColorsForSize]);
 
   // effect on carousel1
   useEffect(() => {
     if (!api) return;
     api.scrollTo(currentImage);
 
-    api.on("select", (index) => {
+    api.on("select", () => {
       setCurrentImage(api?.selectedScrollSnap());
     });
   }, [api, currentImage]);
@@ -124,7 +124,7 @@ const ProductCard = ({ item }: ProductCardProps) => {
     return productvariant.find(
       (item) => item.color.name == color && item.size.name == size
     );
-  }, [size, color]);
+  }, [size, color , productvariant]);
 
   return (
     <div className="grow w-full relative flex flex-col z-0">

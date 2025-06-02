@@ -25,7 +25,8 @@ export async function adminAuthMiddleware(request: NextRequest) {
       const { payload } = await jwtVerify(token, secretKey);
 
       // Lấy thông tin từ payload đã giải mã
-      const { userId, username, roles } = payload as any;
+      // eslint-disable-next-line
+      const { roles } = payload as any;
 
       // Kiểm tra role admin
       if (!roles || !Array.isArray(roles) || !roles.includes(Role.ADMIN)) {

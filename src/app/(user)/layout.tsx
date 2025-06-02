@@ -15,15 +15,15 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { data: userData, isLoading, } = useUserInfo();
+  const { data: user, isLoading, } = useUserInfo();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Redirect to login if not authenticated
   useEffect(() => {
-    if (!isLoading && !userData?.user) {
+    if (!isLoading && !user) {
       router.push("/login?redirect=/user/profile");
     }
-  }, [userData, isLoading, router]);
+  }, [user, isLoading, router]);
 
   const handleLogout = async () => {
     try {
@@ -41,7 +41,7 @@ export default function UserLayout({
     return <UserLayoutSkeleton />;
   }
 
-  if (!userData?.user) {
+  if (!user) {
     return null; // Will redirect in useEffect
   }
 
@@ -69,8 +69,8 @@ export default function UserLayout({
                   <User className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">{userData.user.displayname}</p>
-                  <p className="text-sm text-gray-500">{userData.user.email}</p>
+                  <p className="font-medium">{user?.displayname}</p>
+                  <p className="text-sm text-gray-500">{user?.email}</p>
                 </div>
               </div>
 

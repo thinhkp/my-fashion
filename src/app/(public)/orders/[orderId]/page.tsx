@@ -9,14 +9,12 @@ import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import Image from "next/image";
 import Link from "next/link";
-import { OrderStatus } from "@/constants/order-status";
 import {
   ChevronLeft,
   ShoppingBag,
   Truck,
   Clock,
   CheckCircle,
-  AlertCircle,
 } from "lucide-react";
 import {
   Card,
@@ -29,7 +27,6 @@ import {
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -103,7 +100,7 @@ const OrderStatusSteps = ({ currentStatus }: { currentStatus: number }) => {
   return (
     <div className="py-4">
       <div className="flex items-center justify-between w-full mb-2">
-        {steps.map((step, i) => (
+        {steps.map((step,) => (
           <div key={step.id} className="flex flex-col items-center">
             <div
               className={`flex items-center justify-center w-8 h-8 rounded-full ${

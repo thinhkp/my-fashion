@@ -1,18 +1,6 @@
-import {
-  HomeSection,
-  HomeSectionHeader,
-} from "@/components/my-ui/home-section";
+
 import Slider from "@/components/Slider";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
-import Image from "next/image";
-import {prisma} from "@/services/prisma";
-import { ArrowRight } from "lucide-react";
+
 import CateSection from "@/components/CateSection";
 import DiscountSection from "@/components/DiscountSection";
 import CateWithProducts from "@/components/CateWithProducts";

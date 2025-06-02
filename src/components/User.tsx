@@ -1,12 +1,17 @@
 "use client";
 
-import { CircleAlert, Clipboard, ClipboardCheck, LogOut, User } from "lucide-react";
+import {
+  CircleAlert,
+  ClipboardCheck,
+  LogOut,
+  User,
+} from "lucide-react";
 import React, { useState } from "react";
 import { PopoverTrigger, Popover, PopoverContent } from "./ui/popover";
 import { Separator } from "./ui/separator";
 import { Input } from "@/components/ui/input";
 import { Button } from "./ui/button";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import { Alert, AlertTitle } from "./ui/alert";
@@ -23,25 +28,18 @@ const UserC = ({ allowOpen }: UserProps) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const { data, refetch } = useUserInfo();
-
-  const user = data?.user
-
-  console.log("user", user);
-  
-
-   
+  const { data: user, refetch } = useUserInfo();
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: { username: string; password: string }) => {
       const response = await axios.post("/api/auth/login", credentials);
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast.success("Đăng nhập thành công");
       refetch();
     },
-    onError: (error) => {
+    onError: () => {
       setError("Sai tài khoản hoặc mật khẩu");
     },
   });
@@ -118,6 +116,22 @@ const UserC = ({ allowOpen }: UserProps) => {
                   {loginMutation.isPending ? "Đang xử lý..." : "đăng nhập"}
                 </span>
               </Button>
+              <Link
+                className=" flex text-muted-foreground text-xs"
+                href={"/auth/register"}
+              >
+                <span  >Khách hàng mới ?</span>
+                <span className="text-red-400" >Tạotài khoản</span>
+                
+              </Link>
+              <Link
+                className=" flex text-muted-foreground  text-xs"
+                href={"/auth/forgot-password"}
+              >
+                <span>Quên mật khẩu?</span>
+                <span className="text-red-400" >Khôi phục mật khẩu</span>
+                
+              </Link>
             </div>
           )}
           {user && (
@@ -139,7 +153,10 @@ const UserC = ({ allowOpen }: UserProps) => {
                     variant="ghost"
                     className="mt-4 text-red-500 h-auto p-2 border-red-200 hover:bg-red-50 hover:text-red-600 w-full m-0"
                   >
-                    <Link href="/user/profile" className="w-full flex items-center font-bold text-black justify-between gap-2">
+                    <Link
+                      href="/user/profile"
+                      className="w-full flex items-center font-bold text-black justify-between gap-2"
+                    >
                       <User className="size-5 p-2 box-content bg-gray-200 rounded-full " />
                       <span className="grow text-left ">Thông tin cá nhân</span>
                     </Link>
@@ -149,7 +166,10 @@ const UserC = ({ allowOpen }: UserProps) => {
                     variant="ghost"
                     className="mt-4 text-red-500 h-auto p-2 border-red-200 hover:bg-red-50 hover:text-red-600 w-full m-0"
                   >
-                    <Link href="/user/orders" className="w-full flex items-center font-bold text-black justify-between gap-2">
+                    <Link
+                      href="/user/orders"
+                      className="w-full flex items-center font-bold text-black justify-between gap-2"
+                    >
                       <ClipboardCheck className="size-5 p-2 box-content bg-gray-200 rounded-full " />
                       <span className="grow text-left ">Đơn hàng</span>
                     </Link>
@@ -163,7 +183,11 @@ const UserC = ({ allowOpen }: UserProps) => {
                   >
                     <div className="w-full flex items-center font-bold text-black justify-between gap-2">
                       <LogOut className="size-5 p-2 box-content bg-gray-200 rounded-full " />
-                      <span className="grow text-left ">{logoutMutation.isPending ? "Đang xử lý..." : "Đăng xuất"}</span>
+                      <span className="grow text-left ">
+                        {logoutMutation.isPending
+                          ? "Đang xử lý..."
+                          : "Đăng xuất"}
+                      </span>
                     </div>
                   </Button>
                 </div>

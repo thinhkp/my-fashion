@@ -1,5 +1,5 @@
 import { getProductBySlug } from "@/services/data";
-import { Prisma, user, size, color } from "../generated/prisma";
+import { Prisma, user, size, color } from "@prisma/client";
 
 export type ProductWithRelations = Awaited<ReturnType<typeof getProductBySlug>>;
 
@@ -68,24 +68,29 @@ export type Color = color;
 
 export type Order = Prisma.orderGetPayload<{
   include: {
+    user: {
+      select: {
+        email: true;
+        displayname: true;
+      };
+    };
     items: {
       include: {
         product: {
           select: {
             name: true;
-            slug: true;
-            productimage: {
-              take: 1;
-              select: {
-                imageurl: true;
-              };
-            };
+            sku: true;
           };
         };
         variant: {
           include: {
             color: true;
             size: true;
+            image: {
+              select: {
+                imageurl: true;
+              };
+            };
           };
         };
       };

@@ -14,6 +14,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "./ui/carousel";
+import Link from "next/link";
 
 const CateSection = async () => {
   const categories = await prisma.category.findMany({
@@ -35,21 +36,23 @@ const CateSection = async () => {
           {categories.map((item, index) => {
             return (
               <CarouselItem key={index} className="basis-2/3 md:basis-1/2  lg:basis-1/4   relative pl-5">
-                <div className="w-full aspect-[2/3] relative z-0 overflow-hidden">
-                  <Image
-                    className="z-0 hover:scale-110 transition-all duration-500 object-cover"
-                    src={`/image/categories/${item.image}`}
-                    alt="Description"
-                    fill
-                    sizes="auto"
-                  />
-                  <div className="absolute bottom-0 w-full h-[75px] bg-[rgba(255,255,255,0.4)] z-1 px-4 py-3   lg:py-[15px] lg:px-[20px] flex items-center justify-between gap-1">
-                    <div className="text-2xl"> {item.name}</div>
-                    <div className="h-8 aspect-square rounded-full bg-white flex justify-center items-center ">
-                      <ArrowRight />
+                <Link href={`/collections/${item.slug}`}>
+                  <div className="w-full aspect-[2/3] relative z-0 overflow-hidden">
+                    <Image
+                      className="z-0 hover:scale-110 transition-all duration-500 object-cover"
+                      src={`/image/categories/${item.image}`}
+                      alt="Description"
+                      fill
+                      sizes="auto"
+                    />
+                    <div className="absolute bottom-0 w-full h-[75px] bg-[rgba(255,255,255,0.4)] z-1 px-4 py-3   lg:py-[15px] lg:px-[20px] flex items-center justify-between gap-1">
+                      <div className="text-2xl"> {item.name}</div>
+                      <div className="h-8 aspect-square rounded-full bg-white flex justify-center items-center ">
+                        <ArrowRight />
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               </CarouselItem>
             );
           })}

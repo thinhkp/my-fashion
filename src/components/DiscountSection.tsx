@@ -1,4 +1,3 @@
-import {prisma} from "@/services/prisma";
 import React from "react";
 import {
   HomeSection,
@@ -19,7 +18,6 @@ import Link from "next/link";
 import { getDiscountProducts } from "@/services/data";
 
 const DiscountSection = async ({
-  className,
 }: React.HTMLAttributes<HTMLDivElement>) => {
   
   const products = await getDiscountProducts()

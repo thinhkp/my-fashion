@@ -23,7 +23,6 @@ import { toast } from "sonner";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import useUserInfo from "@/hooks/use-userinfo";
-import { UserInfo } from "@/types/user";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { PopoverTrigger } from "@radix-ui/react-popover";
 import {
@@ -60,12 +59,13 @@ type CheckoutFormValues = z.infer<typeof checkoutFormSchema>;
 
 const CheckoutPage = () => {
   const router = useRouter();
-  const { data: userData } = useUserInfo();
+  const { data: user } = useUserInfo();
   const { cartItemData } = useCart();
 
-  const user: UserInfo = userData?.user;
+  
 
   const createOrder = useMutation({
+    // eslint-disable-next-line
     mutationFn: async (data: any) => {
       return await axios.post("/api/orders", data);
     },

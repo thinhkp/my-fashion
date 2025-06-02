@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { sign } from "jsonwebtoken";
 import { getUserByUsername } from "@/services/data";
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 
 // JWT secret key - in production, store this in environment variables
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
@@ -24,9 +24,9 @@ export async function POST(request: Request) {
 
     // Find user by email
     const user: Prisma.userGetPayload<{
-      include: { userRoles: { include: { role : true} } };
+      include: { userRoles: { include: { role: true } } };
     }> = await getUserByUsername(username, {
-      include: { userRoles: { include: { role : true} } },
+      include: { userRoles: { include: { role: true } } },
     });
 
     // Check if user exists and password matches
@@ -42,10 +42,10 @@ export async function POST(request: Request) {
       {
         userId: user.userId,
         username: user.username,
-        roles: user.userRoles.map((item => item.role.name)) // Include role if available
+        roles: user.userRoles.map((item) => item.role.name), // Include role if available
       },
       JWT_SECRET,
-      { algorithm : "HS256"} // Token expires after 24 hours
+      { algorithm: "HS256" } // Token expires after 24 hours
     );
 
     // No need to store session in database with JWT (stateless)
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
       sameSite: "strict",
     });
 
-    // Return success response
+    // Return success response with returnUrl if it was provided
     return NextResponse.json({
       success: true,
       message: "Đăng nhập thành công",

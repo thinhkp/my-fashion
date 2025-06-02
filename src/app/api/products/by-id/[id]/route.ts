@@ -4,16 +4,16 @@ import { prisma } from "@/services/prisma";
 
 export type GetRes = {
   product?: Product;
-    error?: string;
-    message?: string;
-}
-
+  error?: string;
+  message?: string;
+};
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const id = parseInt(params.id);
 
     if (isNaN(id)) {
@@ -23,7 +23,7 @@ export async function GET(
       );
     }
 
-    const product : Product | null = await prisma.product.findUnique({
+    const product: Product | null = await prisma.product.findUnique({
       where: { id },
       include: {
         productimage: true,
@@ -49,7 +49,7 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({product});
+    return NextResponse.json({ product });
   } catch (error) {
     console.error("Lỗi khi lấy thông tin sản phẩm:", error);
     return NextResponse.json(

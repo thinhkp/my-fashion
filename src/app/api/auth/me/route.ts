@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { getUserById } from "@/services/data";
-import { Prisma } from "@/generated/prisma";
+import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "@/services/prisma";
 
@@ -9,11 +9,15 @@ import { prisma } from "@/services/prisma";
 import { JWT_SECRET } from "@/config/jwt";
 
 // Schema for profile update validation
-const updateProfileSchema = z.object({
+
+
+// Schema for profile update validation - making all fields optional
+const partialUpdateProfileSchema = z.object({
   displayname: z
     .string()
     .min(2, { message: "Tên hiển thị phải có ít nhất 2 ký tự" })
-    .max(50, { message: "Tên hiển thị không được vượt quá 50 ký tự" }),
+    .max(50, { message: "Tên hiển thị không được vượt quá 50 ký tự" })
+    .optional(),
   phone: z
     .string()
     .min(10, { message: "Số điện thoại phải có ít nhất 10 số" })
@@ -28,18 +32,6 @@ const updateProfileSchema = z.object({
     .nullable()
     .or(z.literal("")),
 });
-
-// Schema for password change validation
-const passwordChangeSchema = z
-  .object({
-    currentPassword: z.string().min(6),
-    newPassword: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
-    confirmPassword: z.string(),
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
 
 export async function GET(request: NextRequest) {
   try {
@@ -58,6 +50,7 @@ export async function GET(request: NextRequest) {
 
     // Giải mã JWT token
     const { payload } = await jwtVerify(token, secretKey);
+    // eslint-disable-next-line
     const { userId } = payload as any;
 
     if (!userId) {
@@ -101,6 +94,18 @@ export async function GET(request: NextRequest) {
   }
 }
 
+// Schema for password change validation
+const passwordChangeSchema = z
+  .object({
+    currentPassword: z.string().min(6),
+    newPassword: z.string().min(8).regex(/[A-Z]/).regex(/[a-z]/).regex(/[0-9]/),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
+
 // PATCH: Update user profile or change password
 export async function PATCH(request: NextRequest) {
   try {
@@ -119,6 +124,7 @@ export async function PATCH(request: NextRequest) {
 
     // Giải mã JWT token
     const { payload } = await jwtVerify(token, secretKey);
+    // eslint-disable-next-line
     const { userId } = payload as any;
 
     if (!userId) {
@@ -176,8 +182,8 @@ export async function PATCH(request: NextRequest) {
         message: "Đổi mật khẩu thành công",
       });
     } else {
-      // This is a profile update request
-      const validationResult = updateProfileSchema.safeParse(body);
+      // This is a profile update request - support partial updates
+      const validationResult = partialUpdateProfileSchema.safeParse(body);
 
       if (!validationResult.success) {
         return NextResponse.json(
@@ -189,18 +195,63 @@ export async function PATCH(request: NextRequest) {
         );
       }
 
-      const { displayname, phone, address } = validationResult.data;
+      // Get the validated data
+      const validatedData = validationResult.data;
 
-      // Update user profile
+      // First get current user data
+      const currentUser = await prisma.user.findUnique({
+        where: { userId },
+        select: {
+          email: true,
+          displayname: true,
+          phone: true,
+          address: true,
+        },
+      });
+
+      if (!currentUser) {
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
+      }
+
+      // Prepare update data object with only provided fields
+      const updateData: {
+        displayname?: string;
+        phone?: string | null;
+        address?: string | null;
+      } = {};
+
+      // Only include fields that were provided in the request
+      if (validatedData.displayname !== undefined) {
+        updateData.displayname = validatedData.displayname;
+      }
+
+      if (validatedData.phone !== undefined) {
+        updateData.phone =
+          validatedData.phone === "" ? null : validatedData.phone;
+      }
+
+      if (validatedData.address !== undefined) {
+        updateData.address =
+          validatedData.address === "" ? null : validatedData.address;
+      }
+
+      // Only perform update if there are fields to update
+      if (Object.keys(updateData).length === 0) {
+        return NextResponse.json({
+          message: "Không có thông tin nào được cập nhật",
+          user: {
+            email: currentUser.email,
+            displayname: currentUser.displayname,
+            phone: currentUser.phone,
+            address: currentUser.address,
+          },
+        });
+      }
+
+      // Update user profile with only the provided fields
       const updatedUser = await prisma.user.update({
-        where: {
-          userId: userId,
-        },
-        data: {
-          displayname,
-          phone: phone || null,
-          address: address || null,
-        },
+        where: { userId },
+        data: updateData,
         include: {
           userRoles: {
             include: {

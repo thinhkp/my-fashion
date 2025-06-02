@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/services/prisma";
-import { Order } from "@/types/model";
-
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
   try {
+    const params = await context.params;
     const userId = params.userId;
 
     if (!userId) {
@@ -18,29 +17,34 @@ export async function GET(
     }
 
     // Fetch orders for the specified user with related items, products, and variants
-    const orders : Order[] = await prisma.order.findMany({
+    const orders = await prisma.order.findMany({
       where: {
         userId: userId,
       },
       include: {
+        user: {
+          select: {
+            displayname: true,
+            email: true,
+          },
+        },
         items: {
           include: {
             product: {
               select: {
                 name: true,
-                slug: true,
-                productimage: {
-                  take: 1,
-                  select: {
-                    imageurl: true,
-                  },
-                },
+                sku: true,
               },
             },
             variant: {
               include: {
-                color: true,
+                image: {
+                  select: {
+                    imageurl: true,
+                  },
+                },
                 size: true,
+                color: true,
               },
             },
           },
@@ -51,7 +55,7 @@ export async function GET(
       },
     });
 
-    return NextResponse.json({orders}, { status: 200 });
+    return NextResponse.json({ orders }, { status: 200 });
   } catch (error) {
     console.error("Error fetching orders:", error);
     return NextResponse.json(

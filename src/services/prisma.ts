@@ -3,6 +3,8 @@ import { PrismaClient } from '@prisma/client'
 
 // Biến global để lưu trữ instance PrismaClient giữa các hot reloads
 declare global {
+
+  // eslint-disable-next-line
   var prisma: PrismaClient | undefined
 }
 

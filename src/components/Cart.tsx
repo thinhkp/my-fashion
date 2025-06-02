@@ -1,7 +1,7 @@
 "use client";
 
 import { ShoppingBag, X, Plus, Minus } from "lucide-react";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, {  useLayoutEffect, useState } from "react";
 import {
   Drawer,
   DrawerTrigger,

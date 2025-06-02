@@ -7,6 +7,7 @@ interface JWTPayload {
   userId?: number;
   roles?: string[];
   email?: string;
+  // eslint-disable-next-line
   [key: string]: any;
 }
 

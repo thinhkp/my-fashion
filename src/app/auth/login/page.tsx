@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import AuthForm from "../auth-form";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Đăng nhập | My Fashion",
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
 export default function LoginPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-md">
-      <AuthForm initialTab="login" />
+      <Suspense fallback={<div>Loading...</div>}>
+        <AuthForm initialTab="login" />
+      </Suspense>
     </div>
   );
 }

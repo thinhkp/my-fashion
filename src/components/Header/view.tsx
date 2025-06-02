@@ -21,8 +21,8 @@ interface ScrollHeaderProps {
 
 const ScrollHeader: React.FC<ScrollHeaderProps> = ({  cates }) => {
   const [allowOpen, setAllowOpen] = useState(true)
-  const { data: userData } = useUserInfo(); // Lấy thông tin user
-  const isAdmin = userData?.user?.roles?.includes('Admin'); // Kiểm tra quyền admin
+  const { data: user } = useUserInfo(); // Lấy thông tin user
+  const isAdmin = user?.roles?.includes('Admin'); // Kiểm tra quyền admin
 
   const lastPosition = useRef(0);
   const element = useRef<HTMLDivElement>(null);

@@ -1,138 +1,81 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { format } from 'date-fns';
-import Image from 'next/image';
-import { Loader2, ArrowLeft, CheckCircle, XCircle } from 'lucide-react';
-import axios from 'axios';
-import { Button } from '@/components/ui/button';
+import { useParams, useRouter } from "next/navigation";
+import { format } from "date-fns";
+import Image from "next/image";
+import { Loader2, ArrowLeft, CheckCircle } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { GetRes } from "@/app/api/orders/[orderId]/route";
+import { Order } from "@/types/model";
 
 // Order status mapping
 const ORDER_STATUS = {
-  0: { name: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-800' },
-  1: { name: 'Đã xác nhận', color: 'bg-blue-100 text-blue-800' },
-  2: { name: 'Đang giao hàng', color: 'bg-purple-100 text-purple-800' },
-  3: { name: 'Đã giao hàng', color: 'bg-green-100 text-green-800' },
-  4: { name: 'Đã hủy', color: 'bg-red-100 text-red-800' },
+  0: { name: "Chờ xác nhận", color: "bg-yellow-100 text-yellow-800" },
+  1: { name: "Đã xác nhận", color: "bg-blue-100 text-blue-800" },
+  2: { name: "Đang giao hàng", color: "bg-purple-100 text-purple-800" },
+  3: { name: "Đã giao hàng", color: "bg-green-100 text-green-800" },
+  4: { name: "Đã hủy", color: "bg-red-100 text-red-800" },
 };
 
 const PAYMENT_STATUS = {
-  0: { name: 'Chưa thanh toán', color: 'bg-red-100 text-red-800' },
-  1: { name: 'Đã thanh toán', color: 'bg-green-100 text-green-800' },
+  0: { name: "Chưa thanh toán", color: "bg-red-100 text-red-800" },
+  1: { name: "Đã thanh toán", color: "bg-green-100 text-green-800" },
 };
-
-// Define interfaces based on your Prisma schema
-interface OrderItem {
-  id: string;
-  productId: number;
-  variantId?: number | null;
-  quantity: number;
-  price: number;
-  product: {
-    name: string;
-    sku: string;
-  };
-  variant?: {
-    id: number;
-    sku: string;
-    color: {
-      name: string;
-      code: string;
-    };
-    size: {
-      name: string;
-    };
-    image?: {
-      imageurl: string;
-    };
-  } | null;
-}
-
-interface Order {
-  id: string;
-  userId?: string | null;
-  totalPrice: number;
-  shippingFee: number;
-  status: number;
-  paymentMethod: string;
-  paymentStatus: number;
-  recipientName: string;
-  phone: string;
-  address: string;
-  note?: string | null;
-  createdAt: string;
-  updatedAt: string;
-  items: OrderItem[];
-  user?: {
-    email: string;
-    displayname: string;
-  } | null;
-}
 
 export default function OrderDetailPage() {
   const params = useParams();
   const router = useRouter();
   const orderId = params.orderId as string;
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [updatingStatus, setUpdatingStatus] = useState(false);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    async function fetchOrderDetails() {
-      setLoading(true);
-      try {
-        const response = await axios.get(`/api/orders/${orderId}`);
-        
-        const data = await response.data;
-        setOrder(data);
-        setError(null);
-      } catch (err) {
-        setError('Không thể tải thông tin đơn hàng. Vui lòng thử lại sau.');
-        console.error(err);
-      } finally {
-        setLoading(false);
+  // Fetch order data using React Query
+  const { data, isLoading, isError, error } = useQuery({
+    queryKey: ["order", orderId],
+    queryFn: async () => {
+      const response = await axios.get<GetRes>(`/api/orders/${orderId}`);
+      if (response.data.error) {
+        throw new Error(response.data.error);
       }
-    }
-    
-    fetchOrderDetails();
-  }, [orderId]);
+      return response.data.order as Order;
+    },
+  });
 
-  const updateOrderStatus = async (newStatus: number) => {
-    setUpdatingStatus(true);
-   try {
-      const response = await axios.patch(`/api/orders/${orderId}`, {
-        status: newStatus
+  // Mutation for updating order status
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async (newStatus: number) => {
+      return axios.patch(`/api/orders/${orderId}`, {
+        status: newStatus,
       });
-      // Update the local order state with the new status
-      setOrder(prev => prev ? { ...prev, status: newStatus } : null);
-    } catch (err) {
-      setError('Cập nhật trạng thái đơn hàng thất bại. Vui lòng thử lại.');
-      console.error(err);
-    } finally {
-      setUpdatingStatus(false);
-    }
+    },
+    onSuccess: () => {
+      // Invalidate and refetch the order data
+      queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+    },
+  });
+
+  // Mutation for updating payment status
+  const updatePaymentStatusMutation = useMutation({
+    mutationFn: async (newStatus: number) => {
+      return axios.patch(`/api/orders/${orderId}`, {
+        paymentStatus: newStatus,
+      });
+    },
+    onSuccess: () => {
+      // Invalidate and refetch the order data
+      queryClient.invalidateQueries({ queryKey: ["order", orderId] });
+    },
+  });
+
+  const updateOrderStatus = (newStatus: number) => {
+    updateOrderStatusMutation.mutate(newStatus);
   };
 
-  const updatePaymentStatus = async (newStatus: number) => {
-    setUpdatingStatus(true);
-    try {
-      const response = await axios.patch(`/api/orders/${orderId}`, {
-        paymentStatus: newStatus
-      });
-      
-      // Update the local order state with the new payment status
-      setOrder(prev => prev ? { ...prev, paymentStatus: newStatus } : null);
-    } catch (err) {
-      setError('Cập nhật trạng thái thanh toán thất bại. Vui lòng thử lại.');
-      console.error(err);
-    } finally {
-      setUpdatingStatus(false);
-    }
+  const updatePaymentStatus = (newStatus: number) => {
+    updatePaymentStatusMutation.mutate(newStatus);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen p-8 flex justify-center items-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -141,13 +84,17 @@ export default function OrderDetailPage() {
     );
   }
 
-  if (error) {
+  if (isError) {
     return (
       <div className="min-h-screen p-8">
         <div className="bg-red-50 p-4 rounded-md">
           <h2 className="text-red-800 font-medium text-lg">Lỗi</h2>
-          <p className="text-red-700">{error}</p>
-          <button 
+          <p className="text-red-700">
+            {error instanceof Error
+              ? error.message
+              : "Không thể tải thông tin đơn hàng. Vui lòng thử lại sau."}
+          </p>
+          <button
             onClick={() => router.back()}
             className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center"
           >
@@ -159,14 +106,18 @@ export default function OrderDetailPage() {
     );
   }
 
-  if (!order) {
+  if (!data) {
     return (
       <div className="min-h-screen p-8">
         <div className="bg-amber-50 p-4 rounded-md">
-          <h2 className="text-amber-800 font-medium text-lg">Không tìm thấy đơn hàng</h2>
-          <p className="text-amber-700">Không thể tìm thấy đơn hàng với mã: {orderId}</p>
-          <button 
-            onClick={() => router.back()} 
+          <h2 className="text-amber-800 font-medium text-lg">
+            Không tìm thấy đơn hàng
+          </h2>
+          <p className="text-amber-700">
+            Không thể tìm thấy đơn hàng với mã: {orderId}
+          </p>
+          <button
+            onClick={() => router.back()}
             className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-md flex items-center"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -177,19 +128,27 @@ export default function OrderDetailPage() {
     );
   }
 
-  const orderStatusInfo = ORDER_STATUS[order.status as keyof typeof ORDER_STATUS];
-  const paymentStatusInfo = PAYMENT_STATUS[order.paymentStatus as keyof typeof PAYMENT_STATUS];
+  const order = data;
+  const orderStatusInfo =
+    ORDER_STATUS[order.status as keyof typeof ORDER_STATUS];
+  const paymentStatusInfo =
+    PAYMENT_STATUS[order.paymentStatus as keyof typeof PAYMENT_STATUS];
+  const isUpdatingStatus =
+    updateOrderStatusMutation.isPending ||
+    updatePaymentStatusMutation.isPending;
 
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6 flex items-center">
-        <button 
-          onClick={() => router.back()} 
+        <button
+          onClick={() => router.back()}
           className="mr-4 p-2 rounded-full hover:bg-gray-100"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
-        <h1 className="text-2xl font-bold">Chi tiết đơn hàng #{order.id.substring(0, 8)}</h1>
+        <h1 className="text-2xl font-bold">
+          Chi tiết đơn hàng #{order.id.substring(0, 8).toUpperCase()}
+        </h1>
       </div>
 
       {/* Order Info & Status Section */}
@@ -199,11 +158,14 @@ export default function OrderDetailPage() {
             <div>
               <h2 className="text-lg font-semibold">Thông tin đơn hàng</h2>
               <p className="text-gray-600">
-                Ngày tạo: {format(new Date(order.createdAt), 'dd/MM/yyyy HH:mm')}
+                Ngày tạo:{" "}
+                {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
               </p>
             </div>
             <div className="mt-2 sm:mt-0">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${orderStatusInfo.color}`}>
+              <span
+                className={`px-3 py-1 rounded-full text-sm font-medium ${orderStatusInfo.color}`}
+              >
                 {orderStatusInfo.name}
               </span>
             </div>
@@ -211,15 +173,28 @@ export default function OrderDetailPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div>
-              <h3 className="font-medium text-gray-700 mb-2">Thông tin khách hàng</h3>
-              <p><span className="text-gray-500">Họ tên:</span> {order.recipientName}</p>
-              <p><span className="text-gray-500">Số điện thoại:</span> {order.phone}</p>
+              <h3 className="font-medium text-gray-700 mb-2">
+                Thông tin khách hàng
+              </h3>
+              <p>
+                <span className="text-gray-500">Họ tên:</span>{" "}
+                {order.recipientName}
+              </p>
+              <p>
+                <span className="text-gray-500">Số điện thoại:</span>{" "}
+                {order.phone}
+              </p>
               {order.user && (
-                <p><span className="text-gray-500">Email:</span> {order.user.email}</p>
+                <p>
+                  <span className="text-gray-500">Email:</span>{" "}
+                  {order.user.email}
+                </p>
               )}
             </div>
             <div>
-              <h3 className="font-medium text-gray-700 mb-2">Địa chỉ giao hàng</h3>
+              <h3 className="font-medium text-gray-700 mb-2">
+                Địa chỉ giao hàng
+              </h3>
               <p>{order.address}</p>
               {order.note && (
                 <div className="mt-2">
@@ -233,19 +208,21 @@ export default function OrderDetailPage() {
 
         <div className="bg-white p-6 rounded-lg shadow-sm border">
           <h2 className="text-lg font-semibold mb-4">Quản lý đơn hàng</h2>
-          
+
           <div className="mb-6">
-            <h3 className="font-medium text-gray-700 mb-2">Trạng thái đơn hàng</h3>
+            <h3 className="font-medium text-gray-700 mb-2">
+              Trạng thái đơn hàng
+            </h3>
             <div className="flex flex-col gap-2">
               {Object.entries(ORDER_STATUS).map(([key, value]) => (
                 <button
                   key={key}
                   onClick={() => updateOrderStatus(Number(key))}
-                  disabled={updatingStatus || order.status === Number(key)}
+                  disabled={isUpdatingStatus || order.status === Number(key)}
                   className={`px-4 py-2 rounded-md text-left flex justify-between items-center ${
                     order.status === Number(key)
                       ? value.color
-                      : 'bg-gray-100 hover:bg-gray-200'
+                      : "bg-gray-100 hover:bg-gray-200"
                   }`}
                 >
                   {value.name}
@@ -255,41 +232,57 @@ export default function OrderDetailPage() {
                 </button>
               ))}
             </div>
+            {updateOrderStatusMutation.isError && (
+              <p className="text-red-600 text-sm mt-2">
+                Lỗi khi cập nhật trạng thái đơn hàng. Vui lòng thử lại.
+              </p>
+            )}
           </div>
-          
+
           <div>
-            <h3 className="font-medium text-gray-700 mb-2">Trạng thái thanh toán</h3>
+            <h3 className="font-medium text-gray-700 mb-2">
+              Trạng thái thanh toán
+            </h3>
             <div className="mb-2">
-              <p className="text-sm text-gray-600 mb-1">Phương thức thanh toán: {order.paymentMethod}</p>
-              <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${paymentStatusInfo.color}`}>
+              <p className="text-sm text-gray-600 mb-1">
+                Phương thức thanh toán: {order.paymentMethod}
+              </p>
+              <span
+                className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${paymentStatusInfo.color}`}
+              >
                 {paymentStatusInfo.name}
               </span>
             </div>
-            
+
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => updatePaymentStatus(0)}
-                disabled={updatingStatus || order.paymentStatus === 0}
+                disabled={isUpdatingStatus || order.paymentStatus === 0}
                 className={`px-3 py-2 rounded-md text-sm ${
-                  order.paymentStatus === 0 
-                    ? 'bg-red-100 text-red-800' 
-                    : 'bg-gray-100 hover:bg-gray-200'
+                  order.paymentStatus === 0
+                    ? "bg-red-100 text-red-800"
+                    : "bg-gray-100 hover:bg-gray-200"
                 }`}
               >
                 Chưa thanh toán
               </button>
               <button
                 onClick={() => updatePaymentStatus(1)}
-                disabled={updatingStatus || order.paymentStatus === 1}
+                disabled={isUpdatingStatus || order.paymentStatus === 1}
                 className={`px-3 py-2 rounded-md text-sm ${
-                  order.paymentStatus === 1 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-gray-100 hover:bg-gray-200'
+                  order.paymentStatus === 1
+                    ? "bg-green-100 text-green-800"
+                    : "bg-gray-100 hover:bg-gray-200"
                 }`}
               >
                 Đã thanh toán
               </button>
             </div>
+            {updatePaymentStatusMutation.isError && (
+              <p className="text-red-600 text-sm mt-2">
+                Lỗi khi cập nhật trạng thái thanh toán. Vui lòng thử lại.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -315,7 +308,7 @@ export default function OrderDetailPage() {
                       <div className="w-12 h-12 relative mr-4 bg-gray-100 rounded">
                         {item.variant?.image ? (
                           <Image
-                            src={item.variant.image.imageurl}
+                            src={`/image/products/` + item.variant.image.imageurl}
                             alt={item.product.name}
                             fill
                             className="object-cover rounded"
@@ -330,7 +323,8 @@ export default function OrderDetailPage() {
                         <p className="font-medium">{item.product.name}</p>
                         {item.variant && (
                           <p className="text-sm text-gray-600">
-                            {item.variant.size?.name}, {item.variant.color?.name}
+                            {item.variant.size?.name},{" "}
+                            {item.variant.color?.name}
                           </p>
                         )}
                         <p className="text-xs text-gray-500">
@@ -340,16 +334,16 @@ export default function OrderDetailPage() {
                     </div>
                   </td>
                   <td className="py-3 px-4 text-center">
-                    {new Intl.NumberFormat('vi-VN', {
-                      style: 'currency',
-                      currency: 'VND',
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
                     }).format(item.price)}
                   </td>
                   <td className="py-3 px-4 text-center">{item.quantity}</td>
                   <td className="py-3 px-4 text-right">
-                    {new Intl.NumberFormat('vi-VN', {
-                      style: 'currency',
-                      currency: 'VND',
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
                     }).format(item.price * item.quantity)}
                   </td>
                 </tr>
@@ -365,21 +359,30 @@ export default function OrderDetailPage() {
         <div className="flex flex-col gap-2 text-right">
           <div className="flex justify-between py-2">
             <span className="text-gray-600">Tạm tính:</span>
-            <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-              order.totalPrice - order.shippingFee
-            )}</span>
+            <span>
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(order.totalPrice - order.shippingFee)}
+            </span>
           </div>
           <div className="flex justify-between py-2">
             <span className="text-gray-600">Phí vận chuyển:</span>
-            <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-              order.shippingFee
-            )}</span>
+            <span>
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(order.shippingFee)}
+            </span>
           </div>
           <div className="flex justify-between py-3 border-t font-medium text-lg">
             <span>Tổng cộng:</span>
-            <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
-              order.totalPrice
-            )}</span>
+            <span>
+              {new Intl.NumberFormat("vi-VN", {
+                style: "currency",
+                currency: "VND",
+              }).format(order.totalPrice)}
+            </span>
           </div>
         </div>
       </div>

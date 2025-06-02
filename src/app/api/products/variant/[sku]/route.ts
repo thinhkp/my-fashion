@@ -3,10 +3,11 @@ import { prisma } from "@/services/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { sku: string } }
+  context: { params: Promise<{ sku: string }> }
 ) {
   try {
-    const sku = params.sku;
+    const params = await context.params;
+    const { sku } = params;
 
     if (!sku) {
       return NextResponse.json({ error: "SKU không hợp lệ" }, { status: 400 });
@@ -59,7 +60,7 @@ export async function GET(
       variantId: variant.id,
     };
 
-    return NextResponse.json({variant :responseData}, { status: 200 });
+    return NextResponse.json({ variant: responseData }, { status: 200 });
   } catch (error) {
     console.error("Error fetching variant by SKU:", error);
     return NextResponse.json(

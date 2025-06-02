@@ -179,6 +179,7 @@ export async function POST(request: NextRequest) {
 
         // Thêm imageid vào dữ liệu variant nếu có
         if (variantImageId !== null) {
+          // eslint-disable-next-line
           // @ts-ignore
           variantData.imageid = variantImageId;
         }
@@ -237,3 +238,5 @@ export async function GET() {
     await prisma.$disconnect();
   }
 }
+
+

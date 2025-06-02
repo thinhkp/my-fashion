@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { Suspense, useState } from "react";
 import axios from "axios";
 import Image from "next/image";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -66,6 +66,8 @@ type AuthFormProps = {
 
 const AuthForm = ({ initialTab }: AuthFormProps) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl") || "/user/profile";
   const [activeTab, setActiveTab] = useState<"login" | "register">(initialTab);
 
   // Login form với validation
@@ -105,7 +107,8 @@ const AuthForm = ({ initialTab }: AuthFormProps) => {
     },
     onSuccess: () => {
       toast.success("Đăng nhập thành công");
-      router.push("/account");
+      // Redirect to the return URL from query string
+      router.push(returnUrl);
     },
     onError: (error: Error) => {
       toast.error(error.message || "Đăng nhập thất bại");
@@ -150,12 +153,20 @@ const AuthForm = ({ initialTab }: AuthFormProps) => {
   };
 
   const onRegisterSubmit = (values: RegisterFormValues) => {
+   // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...registerData } = values;
     registerMutation.mutate(registerData);
   };
 
   return (
-    <>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-2 text-gray-600">Đang tải...</p>
+        </div>
+      </div>
+    }>
       {/* Logo */}
       <div className="text-center mb-8">
         <Link href="/" className="inline-block">
@@ -172,7 +183,9 @@ const AuthForm = ({ initialTab }: AuthFormProps) => {
       {/* Login/Register Tabs */}
       <Tabs
         value={activeTab}
-        onValueChange={(value) => handleTabChange(value as "login" | "register")}
+        onValueChange={(value) =>
+          handleTabChange(value as "login" | "register")
+        }
         className="w-full"
       >
         <TabsList className="grid h-auto w-full grid-cols-2 mb-8">
@@ -411,7 +424,7 @@ const AuthForm = ({ initialTab }: AuthFormProps) => {
           </Form>
         </TabsContent>
       </Tabs>
-    </>
+    </Suspense>
   );
 };
 

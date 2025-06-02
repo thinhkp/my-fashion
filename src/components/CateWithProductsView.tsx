@@ -1,6 +1,5 @@
 "use client";
-import { category } from "@/generated/prisma";
-import React, { useEffect, useState } from "react";
+import React, {  useState } from "react";
 import {
   HomeSection,
   HomeSectionContent,
@@ -9,13 +8,13 @@ import {
 import { cn } from "@/lib/utils";
 import ProductCard from "./ProductCard";
 import { useQuery } from "@tanstack/react-query";
-import ProductCardSkeleton from "./ProductCardSkeleton";
-import { Product, ProductCardType } from "@/types/model";
+import { Product } from "@/types/model";
 import { fetchApi } from "@/api";
 const CateWithProductsView = ({
   cates,
   productsInCate,
 }: {
+  // eslint-disable-next-line
   cates: any[];
   productsInCate: Product[];
 }) => {

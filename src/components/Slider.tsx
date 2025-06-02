@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import Autoplay from "embla-carousel-autoplay";
-import { HtmlProps } from "next/dist/shared/lib/html-context.shared-runtime";
 import { cn } from "@/lib/utils";
 
 const slideImgs = [
