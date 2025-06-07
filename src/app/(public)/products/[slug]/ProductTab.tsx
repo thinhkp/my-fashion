@@ -20,10 +20,12 @@ const ProductTab = () => {
             <h3 className="text-lg sm:text-xl md:text-2xl font-semibold mt-6 sm:mt-8 md:mt-12 mb-3 sm:mb-4 md:mb-6">
               1. CHÍNH SÁCH ÁP DỤNG
             </h3>
-            <p className="mb-3 sm:mb-4">Áp dụng từ ngày 01/09/2018.</p>
             <p className="mb-3 sm:mb-4">
-              Trong vòng 30 ngày kể từ ngày mua sản phẩm với các sản phẩm
-              TORANO.
+              Chính sách có hiệu lực từ ngày 01/09/2018.
+            </p>
+            <p className="mb-3 sm:mb-4">
+              Áp dụng trong vòng 30 ngày kể từ ngày mua sản phẩm với các sản
+              phẩm TORANO.
             </p>
             <p className="mb-3 sm:mb-4">
               Áp dụng đối với sản phẩm nguyên giá và sản phẩm giảm giá ít hơn

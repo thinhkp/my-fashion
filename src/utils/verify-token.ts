@@ -7,7 +7,7 @@ interface JWTPayload {
   userId?: number;
   roles?: string[];
   email?: string;
-  // eslint-disable-next-line
+  // Tắt kiểm tra ESLint cho thuộc tính động
   [key: string]: any;
 }
 
@@ -57,11 +57,10 @@ export async function verifyManageAccess(
     // Check if user has admin or manager role
     // Using the Role enum for type safety and consistency
     const hasAdminAccess = userPayload.roles?.some(
-        (role) => role === Role.ADMIN || role === Role.MANAGER
-      );
-    
+      (role) => role === Role.ADMIN || role === Role.MANAGER
+    );
+
     console.log("User roles:", userPayload.roles);
-    
 
     if (hasAdminAccess) {
       return {
@@ -73,16 +72,14 @@ export async function verifyManageAccess(
           email: userPayload.email,
         },
       };
-    } 
-    else {
+    } else {
       return {
         authorized: false,
         error: "Insufficient permissions",
         user: null,
       };
     }
-  } 
-  catch (error) {
+  } catch (error) {
     console.error("Token verification error:", error);
     return {
       authorized: false,

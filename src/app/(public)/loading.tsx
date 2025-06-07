@@ -41,12 +41,10 @@ const Loading = () => {
 
         <div className="flex items-center gap-4">
           <Loader2 className="h-8 w-8 text-red-500 animate-spin" />
-          <p className="text-lg text-gray-700">Đang tải...</p>
+          <p className="text-lg text-gray-700">Loading...</p>
         </div>
 
-        <div className="mt-4 text-sm text-gray-500">
-          Vui lòng đợi trong giây lát
-        </div>
+        <div className="mt-4 text-sm text-gray-500">Please wait a moment</div>
       </div>
     </div>
   );

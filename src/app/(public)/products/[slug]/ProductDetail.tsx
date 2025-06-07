@@ -169,7 +169,6 @@ const ProductDetail = ({ product }: Props) => {
     return product.discountprice + additionalPrice;
   }, [product, currentVariant]);
 
-
   const { addToCart } = useCart();
 
   const handleAddToCart = () => {
@@ -305,7 +304,8 @@ const ProductDetail = ({ product }: Props) => {
                 </h1>
                 <div className="flex flex-wrap gap-2 mb-5">
                   <span className="text-xs">
-                    Mã sản phẩm: <strong>{currentVariant?.sku || "N/A"}</strong>
+                    Mã sản phẩm:{" "}
+                    <strong>{currentVariant?.sku || "Không có"}</strong>
                   </span>
                   <span className="text-xs">
                     Tình trạng: <strong>{getStockStatusText()}</strong>
@@ -313,7 +313,7 @@ const ProductDetail = ({ product }: Props) => {
                 </div>
                 <div className="p-3 sm:p-4 mb-5 rounded-md bg-gray-100">
                   <span className="min-w-20 sm:min-w-30 inline-block text-sm sm:text-base">
-                    Giá:
+                    Giá bán:
                   </span>
                   {finalDiscountPrice !== null ? (
                     <>

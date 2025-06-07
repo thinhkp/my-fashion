@@ -270,10 +270,6 @@ export default function UpdateProduct() {
     setUploadedImages(updatedImages);
   };
 
-  
-  
-  
-
   const addVariant = () => {
     appendVariant({
       colorid: "",
@@ -353,15 +349,11 @@ export default function UpdateProduct() {
       );
 
       // Submit to API using axios
-       await axios.put(
-        `/api/products/${product.id}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await axios.put(`/api/products/${product.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       alert("Product updated successfully");
       router.push("/admin/products");
@@ -489,7 +481,7 @@ export default function UpdateProduct() {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">
-        Update Product: {product?.name}
+        Cập nhật sản phẩm: {product?.name}
       </h1>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -498,11 +490,11 @@ export default function UpdateProduct() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">
-                Product Name
+                Tên sản phẩm
               </label>
               <input
                 type="text"
-                {...register("name", { required: "Product name is required" })}
+                {...register("name", { required: "Tên sản phẩm là bắt buộc" })}
                 className="w-full border rounded-md p-2"
               />
               {errors.name && (
@@ -512,21 +504,23 @@ export default function UpdateProduct() {
 
             <div>
               <label className="block text-sm font-medium mb-1">
-                Slug (optional)
+                Đường dẫn (Slug)
               </label>
               <input
                 type="text"
                 {...register("slug")}
                 className="w-full border rounded-md p-2"
-                placeholder="auto-generated-if-empty"
+                placeholder="tự động tạo nếu để trống"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">SKU</label>
+              <label className="block text-sm font-medium mb-1">
+                Mã sản phẩm (SKU)
+              </label>
               <input
                 type="text"
-                {...register("sku", { required: "SKU is required" })}
+                {...register("sku", { required: "Mã sản phẩm là bắt buộc" })}
                 className="w-full border rounded-md p-2"
               />
               {errors.sku && (
@@ -536,12 +530,12 @@ export default function UpdateProduct() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Price</label>
+                <label className="block text-sm font-medium mb-1">Giá</label>
                 <input
                   type="number"
                   {...register("price", {
-                    required: "Price is required",
-                    min: { value: 0, message: "Price must be positive" },
+                    required: "Giá là bắt buộc",
+                    min: { value: 0, message: "Giá phải lớn hơn 0" },
                     valueAsNumber: true,
                   })}
                   className="w-full border rounded-md p-2"
@@ -553,14 +547,14 @@ export default function UpdateProduct() {
 
               <div>
                 <label className="block text-sm font-medium mb-1">
-                  Discount Price
+                  Giá khuyến mãi
                 </label>
                 <input
                   type="number"
                   {...register("discountprice", {
                     min: {
                       value: 0,
-                      message: "Discount price must be positive",
+                      message: "Giá khuyến mãi phải lớn hơn 0",
                     },
                     valueAsNumber: true,
                   })}
@@ -576,17 +570,19 @@ export default function UpdateProduct() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Status</label>
+                <label className="block text-sm font-medium mb-1">
+                  Trạng thái
+                </label>
                 <select
                   {...register("status", {
-                    required: "Status is required",
+                    required: "Trạng thái là bắt buộc",
                     valueAsNumber: true,
                   })}
                   className="w-full border rounded-md p-2"
                 >
-                  <option value={1}>Active</option>
-                  <option value={0}>Inactive</option>
-                  <option value={2}>Draft</option>
+                  <option value={1}>Kích hoạt</option>
+                  <option value={0}>Không kích hoạt</option>
+                  <option value={2}>Nháp</option>
                 </select>
                 {errors.status && (
                   <p className="text-red-500 text-sm">
@@ -603,7 +599,7 @@ export default function UpdateProduct() {
                   className="mr-2"
                 />
                 <label htmlFor="isfeatured" className="text-sm font-medium">
-                  Featured Product
+                  Sản phẩm nổi bật
                 </label>
               </div>
             </div>
@@ -613,11 +609,11 @@ export default function UpdateProduct() {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">
-                Description
+                Mô tả sản phẩm
               </label>
               <textarea
                 {...register("description", {
-                  required: "Description is required",
+                  required: "Mô tả sản phẩm là bắt buộc",
                 })}
                 rows={5}
                 className="w-full border rounded-md p-2"
@@ -630,9 +626,7 @@ export default function UpdateProduct() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Categories
-              </label>
+              <label className="block text-sm font-medium mb-1">Danh mục</label>
               {categories.length > 0 ? (
                 <div className="max-h-60 overflow-y-auto border rounded-md p-2">
                   {categories.map((category) => (
@@ -642,7 +636,7 @@ export default function UpdateProduct() {
                         id={`category-${category.id}`}
                         value={category.id}
                         {...register("categoryIds", {
-                          required: "At least one category is required",
+                          required: "Ít nhất một danh mục là bắt buộc",
                         })}
                         className="mr-2"
                       />
@@ -653,7 +647,7 @@ export default function UpdateProduct() {
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500">Loading categories...</p>
+                <p className="text-gray-500">Đang tải danh mục...</p>
               )}
               {errors.categoryIds && (
                 <p className="text-red-500 text-sm">
@@ -666,11 +660,11 @@ export default function UpdateProduct() {
 
         {/* Product Images */}
         <div className="mt-6">
-          <h2 className="text-xl font-medium mb-4">Product Images</h2>
+          <h2 className="text-xl font-medium mb-4">Hình ảnh sản phẩm</h2>
 
           <div className="mb-4">
             <label className="block text-sm font-medium mb-1">
-              Upload New Images
+              Tải lên hình ảnh mới
             </label>
             <input
               type="file"
@@ -681,7 +675,7 @@ export default function UpdateProduct() {
             />
             {uploadedImages.length === 0 && (
               <p className="text-red-500 text-sm mt-1">
-                At least one product image is required
+                Ít nhất một hình ảnh sản phẩm là bắt buộc
               </p>
             )}
           </div>
@@ -719,12 +713,12 @@ export default function UpdateProduct() {
                 <div className="mt-2 flex justify-between items-center">
                   <div className="text-sm font-medium">
                     {index === 0 ? (
-                      <span className="text-green-600">Main Image</span>
+                      <span className="text-green-600">Hình ảnh chính</span>
                     ) : index === 1 ? (
-                      <span className="text-blue-600">Sub Image</span>
+                      <span className="text-blue-600">Hình ảnh phụ</span>
                     ) : (
                       <span className="text-gray-600">
-                        Variant Image #{index - 1}
+                        Hình ảnh biến thể #{index - 1}
                       </span>
                     )}
                   </div>
@@ -745,14 +739,14 @@ export default function UpdateProduct() {
                       />
                     </svg>
                     <span className="text-xs text-gray-500">
-                      Drag to reorder
+                      Kéo để thay đổi thứ tự
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-2 text-xs text-gray-500">
-                  Order: {image.displayorder + 1}
-                  {image.isExisting ? " (Existing)" : " (New)"}
+                  Thứ tự: {image.displayorder + 1}
+                  {image.isExisting ? " (Có sẵn)" : " (Mới)"}
                 </div>
               </div>
             ))}
@@ -762,20 +756,20 @@ export default function UpdateProduct() {
         {/* Product Variants */}
         <div className="mt-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-medium">Product Variants</h2>
+            <h2 className="text-xl font-medium">Biến thể sản phẩm</h2>
             <button
               type="button"
               onClick={addVariant}
               className="bg-blue-500 text-white px-4 py-2 rounded-md text-sm"
             >
-              Add Variant
+              Thêm biến thể
             </button>
           </div>
 
           {variantFields.length === 0 && (
             <p className="text-gray-500 mb-4">
-              No variants added yet. &quot;Click Add Variant&quot; to create variations of
-              this product.
+              Chưa có biến thể nào được thêm. &quot;Nhấn Thêm biến thể&quot; để
+              tạo các biến thể cho sản phẩm này.
             </p>
           )}
 
@@ -783,11 +777,9 @@ export default function UpdateProduct() {
             <div key={field.id} className="border rounded-md p-4 mb-4">
               <div className="flex justify-between mb-4">
                 <h3 className="font-medium">
-                  Variant #{index + 1}
+                  Biến thể #{index + 1}
                   {field.id && (
-                    <span className="text-sm text-gray-500 ml-2">
-                      (Existing)
-                    </span>
+                    <span className="text-sm text-gray-500 ml-2">(Có sẵn)</span>
                   )}
                 </h3>
                 <button
@@ -795,23 +787,23 @@ export default function UpdateProduct() {
                   onClick={() => handleRemoveVariant(index)}
                   className="text-red-500"
                 >
-                  Remove
+                  Xóa
                 </button>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Color
+                    Màu sắc
                   </label>
                   <select
                     {...register(`variants.${index}.colorid`, {
-                      required: "Color is required",
+                      required: "Màu sắc là bắt buộc",
                       onChange: (e) => handleColorChange(index, e.target.value),
                     })}
                     className="w-full border rounded-md p-2"
                   >
-                    <option value="">Select Color</option>
+                    <option value="">Chọn màu sắc</option>
                     {colors.map((color) => (
                       <option key={color.id} value={color.id}>
                         {color.name}
@@ -826,15 +818,17 @@ export default function UpdateProduct() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Size</label>
+                  <label className="block text-sm font-medium mb-1">
+                    Kích thước
+                  </label>
                   <select
                     {...register(`variants.${index}.sizeid`, {
-                      required: "Size is required",
+                      required: "Kích thước là bắt buộc",
                       onChange: (e) => handleSizeChange(index, e.target.value),
                     })}
                     className="w-full border rounded-md p-2"
                   >
-                    <option value="">Select Size</option>
+                    <option value="">Chọn kích thước</option>
                     {sizes.map((size) => (
                       <option key={size.id} value={size.id}>
                         {size.name}
@@ -850,12 +844,12 @@ export default function UpdateProduct() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Variant SKU
+                    SKU biến thể
                   </label>
                   <input
                     type="text"
                     {...register(`variants.${index}.sku`, {
-                      required: "SKU is required",
+                      required: "Mã sản phẩm là bắt buộc",
                     })}
                     className={`w-full border rounded-md p-2 ${
                       field.id ? "" : "bg-gray-100"
@@ -869,20 +863,20 @@ export default function UpdateProduct() {
                   )}
                   {!field.id && (
                     <p className="text-xs text-gray-500 mt-1">
-                      Auto-generated: [Main SKU]_[Color ID]-[Size ID]
+                      Tự động tạo: [Mã chính]_[Màu sắc ID]-[Kích thước ID]
                     </p>
                   )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Stock Quantity
+                    Số lượng tồn kho
                   </label>
                   <input
                     type="number"
                     {...register(`variants.${index}.stockquantity`, {
-                      required: "Stock quantity is required",
-                      min: { value: 0, message: "Must be 0 or greater" },
+                      required: "Số lượng tồn kho là bắt buộc",
+                      min: { value: 0, message: "Phải lớn hơn hoặc bằng 0" },
                       valueAsNumber: true,
                     })}
                     className="w-full border rounded-md p-2"
@@ -896,7 +890,7 @@ export default function UpdateProduct() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Additional Price
+                    Giá thêm
                   </label>
                   <input
                     type="number"
@@ -909,7 +903,7 @@ export default function UpdateProduct() {
 
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Variant Image
+                    Hình ảnh biến thể
                   </label>
                   <select
                     {...register(`variants.${index}.imageid`, {
@@ -918,14 +912,14 @@ export default function UpdateProduct() {
                     })}
                     className="w-full border rounded-md p-2"
                   >
-                    <option value="">No specific image</option>
+                    <option value="">Không có hình ảnh cụ thể</option>
                     {uploadedImages.map((img, imgIndex) => (
                       <option key={imgIndex} value={img.id || imgIndex}>
                         {imgIndex === 0
-                          ? "Main Image"
+                          ? "Hình ảnh chính"
                           : imgIndex === 1
-                          ? "Sub Image"
-                          : `Variant Image #${imgIndex - 1}`}
+                          ? "Hình ảnh phụ"
+                          : `Hình ảnh biến thể #${imgIndex - 1}`}
                       </option>
                     ))}
                   </select>
@@ -941,7 +935,7 @@ export default function UpdateProduct() {
             onClick={() => router.push("/admin/products")}
             className="px-6 py-2 border rounded-md"
           >
-            Cancel
+            Hủy
           </button>
 
           <button
@@ -949,7 +943,7 @@ export default function UpdateProduct() {
             disabled={submitLoading}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-blue-300"
           >
-            {submitLoading ? "Updating..." : "Update Product"}
+            {submitLoading ? "Đang cập nhật..." : "Cập nhật sản phẩm"}
           </button>
         </div>
       </form>

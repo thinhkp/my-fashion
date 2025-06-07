@@ -206,15 +206,11 @@ export default function EditCategoryPage() {
       }
 
       // Send PUT request
-       await axios.put(
-        `/api/admin/categories/${categoryId}`,
-        apiFormData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      await axios.put(`/api/admin/categories/${categoryId}`, apiFormData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
       toast.success("Cập nhật thành công", {
         description: "Danh mục đã được cập nhật thành công.",
@@ -333,6 +329,7 @@ export default function EditCategoryPage() {
                     id="description"
                     {...register("description")}
                     rows={5}
+                    placeholder="Nhập mô tả danh mục"
                   />
                 </div>
 

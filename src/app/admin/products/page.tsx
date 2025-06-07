@@ -1,6 +1,6 @@
 "use client";
 
-import {useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -142,7 +142,7 @@ export default function ProductsPage() {
     try {
       // Call the existing DELETE API endpoint
       await axios.delete(`/api/products/${productToDelete.slug}`);
- 
+
       // Show success notification
       toast.success("Xóa sản phẩm thành công", {
         description: `Sản phẩm "${productToDelete.name}" đã được xóa khỏi hệ thống.`,
@@ -184,7 +184,6 @@ export default function ProductsPage() {
     let aValue: any = null;
     //eslint-disable-next-line @typescript-eslint/no-explicit-any
     let bValue: any = null;
-      
 
     if (sortField === "price") {
       aValue = a.price || 0;
@@ -333,7 +332,7 @@ export default function ProductsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[50px]">ID</TableHead>
-                    <TableHead className="w-[80px]">Ảnh</TableHead>
+                    <TableHead className="w-[80px]">Hình ảnh</TableHead>
                     <TableHead
                       className="min-w-[150px]"
                       onClick={() => handleSort("name")}
@@ -343,7 +342,7 @@ export default function ProductsPage() {
                         <ArrowUpDown className="ml-2 h-4 w-4" />
                       </div>
                     </TableHead>
-                    <TableHead>SKU</TableHead>
+                    <TableHead>Mã sản phẩm</TableHead>
                     <TableHead onClick={() => handleSort("price")}>
                       <div className="flex items-center cursor-pointer">
                         Giá
@@ -506,14 +505,19 @@ export default function ProductsPage() {
       </Card>
 
       {/* Delete Confirmation Dialog */}
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa sản phẩm</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa sản phẩm &quot;{productToDelete?.name}&quot;?
+              Bạn có chắc chắn muốn xóa sản phẩm &quot;{productToDelete?.name}
+              &quot;?
               <br />
-              Hành động này không thể hoàn tác và sẽ xóa tất cả hình ảnh và biến thể của sản phẩm.
+              Hành động này không thể hoàn tác và sẽ xóa tất cả hình ảnh và biến
+              thể của sản phẩm.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

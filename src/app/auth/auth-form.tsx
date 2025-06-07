@@ -153,20 +153,22 @@ const AuthForm = ({ initialTab }: AuthFormProps) => {
   };
 
   const onRegisterSubmit = (values: RegisterFormValues) => {
-   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { confirmPassword, ...registerData } = values;
     registerMutation.mutate(registerData);
   };
 
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-2 text-gray-600">Đang tải...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+            <p className="mt-2 text-gray-600">Đang tải...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       {/* Logo */}
       <div className="text-center mb-8">
         <Link href="/" className="inline-block">
@@ -285,7 +287,7 @@ const AuthForm = ({ initialTab }: AuthFormProps) => {
                 <p>
                   Bạn quên mật khẩu?{" "}
                   <Link
-                    href="/forgot-password"
+                    href="/auth/forgot-password"
                     className="text-blue-500 hover:underline"
                   >
                     Quên mật khẩu?

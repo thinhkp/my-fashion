@@ -177,7 +177,7 @@ export default function OrderDetailPage() {
                 Thông tin khách hàng
               </h3>
               <p>
-                <span className="text-gray-500">Họ tên:</span>{" "}
+                <span className="text-gray-500">Họ và tên:</span>{" "}
                 {order.recipientName}
               </p>
               <p>
@@ -308,7 +308,9 @@ export default function OrderDetailPage() {
                       <div className="w-12 h-12 relative mr-4 bg-gray-100 rounded">
                         {item.variant?.image ? (
                           <Image
-                            src={`/image/products/` + item.variant.image.imageurl}
+                            src={
+                              `/image/products/` + item.variant.image.imageurl
+                            }
                             alt={item.product.name}
                             fill
                             className="object-cover rounded"

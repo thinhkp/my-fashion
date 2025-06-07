@@ -100,7 +100,7 @@ const OrderStatusSteps = ({ currentStatus }: { currentStatus: number }) => {
   return (
     <div className="py-4">
       <div className="flex items-center justify-between w-full mb-2">
-        {steps.map((step,) => (
+        {steps.map((step) => (
           <div key={step.id} className="flex flex-col items-center">
             <div
               className={`flex items-center justify-center w-8 h-8 rounded-full ${

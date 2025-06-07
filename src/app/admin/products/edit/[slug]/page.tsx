@@ -240,7 +240,12 @@ export default function EditProduct() {
 
                 <div className="space-y-2">
                   <Label htmlFor="sku">Mã sản phẩm (SKU)</Label>
-                  <Input id="sku" {...register("sku", { required: true })} />
+                  <Input
+                    id="sku"
+                    {...register("sku", {
+                      required: "Mã sản phẩm là bắt buộc",
+                    })}
+                  />
                   {errors.sku && (
                     <p className="text-red-500 text-sm">
                       Vui lòng nhập mã sản phẩm

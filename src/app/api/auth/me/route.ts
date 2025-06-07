@@ -73,13 +73,13 @@ export async function GET(request: NextRequest) {
 
     //  Sử lý thông tin nhạy cảm trước khi trả về
     {
-      const { userId, displayname, email } = user;
+      const { userId, displayname, email , phone , address} = user;
       const roles = user.userRoles.map((ur) => ur.role.name);
 
       // Trả về thông tin user an toàn
       return NextResponse.json(
         {
-          user: { userId, displayname, roles, email },
+          user: { userId, displayname, roles, email ,phone ,address },
           message: "User data retrieved successfully",
         },
         { status: 200 }

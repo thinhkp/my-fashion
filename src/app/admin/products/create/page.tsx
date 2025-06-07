@@ -369,7 +369,7 @@ export default function CreateProduct() {
                 type="text"
                 {...register("slug")}
                 className="w-full border rounded-md p-2"
-                placeholder="auto-generated-if-empty"
+                placeholder="tự động tạo nếu để trống"
               />
             </div>
 
@@ -625,8 +625,8 @@ export default function CreateProduct() {
 
           {variantFields.length === 0 && (
             <p className="text-gray-500 mb-4">
-              No variants added yet. Click &quot;Add Variant&quot; to create variations of
-              this product.
+              No variants added yet. Click &quot;Add Variant&quot; to create
+              variations of this product.
             </p>
           )}
 

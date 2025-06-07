@@ -10,7 +10,7 @@ export type ProductCardType = {
   price: number;
   discountprice?: number;
 
-  // Relationships
+  // Các mối quan hệ với bảng khác
   productimage: {
     id: number;
     imageurl: string;

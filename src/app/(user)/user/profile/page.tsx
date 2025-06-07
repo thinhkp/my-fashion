@@ -29,8 +29,6 @@ export default function UserProfilePage() {
     );
   }
 
- 
-
   return (
     <div>
       <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0 mb-6">
@@ -123,8 +121,6 @@ export default function UserProfilePage() {
               <span className="font-medium">Đổi mật khẩu</span>
               <ChevronRight className="h-4 w-4 text-gray-400" />
             </Link>
-
-            
           </div>
         </div>
       </div>

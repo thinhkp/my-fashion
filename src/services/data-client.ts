@@ -4,15 +4,12 @@ export async function getProductsBySlugArray(
   slugs: string[]
 ): Promise<Product[]> {
   try {
-    if (!slugs.length) return [];
+    // Tạo chuỗi truy vấn với các slug
+    const queryString = slugs
+      .map((slug) => `slugs=${encodeURIComponent(slug)}`)
+      .join("&");
 
-    // Create a query string with the slugs
-    const queryParams = new URLSearchParams();
-    slugs.forEach((slug) => queryParams.append("slugs", slug));
-
-    const response = await fetch(
-      `/api/products/by-slugs?${queryParams.toString()}`
-    );
+    const response = await fetch(`/api/products/by-slugs?${queryString}`);
 
     if (!response.ok) {
       throw new Error("Failed to fetch products by slugs");

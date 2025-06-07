@@ -62,8 +62,6 @@ const CheckoutPage = () => {
   const { data: user } = useUserInfo();
   const { cartItemData } = useCart();
 
-  
-
   const createOrder = useMutation({
     // eslint-disable-next-line
     mutationFn: async (data: any) => {
@@ -541,7 +539,12 @@ const CheckoutPage = () => {
                         disabled={isSubmitting}
                       >
                         {/* COD */}
-                        <div className="border rounded-md p-4 transition-all hover:border-gray-400 cursor-pointer">
+                        <div
+                          className={`border rounded-md p-4 transition-all hover:border-gray-400 cursor-pointer ${
+                            field.value === "cod" ? "border-blue-500 bg-blue-50" : ""
+                          }`}
+                          onClick={() => field.onChange("cod")}
+                        >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="cod" id="cod" />
                             <div className="flex items-center gap-3">
@@ -560,7 +563,12 @@ const CheckoutPage = () => {
                         </div>
 
                         {/* VNPAY */}
-                        <div className="border rounded-md p-4 transition-all hover:border-gray-400 cursor-pointer">
+                        <div
+                          className={`border rounded-md p-4 transition-all hover:border-gray-400 cursor-pointer ${
+                            field.value === "vnpay" ? "border-blue-500 bg-blue-50" : ""
+                          }`}
+                          onClick={() => field.onChange("vnpay")}
+                        >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="vnpay" id="vnpay" />
                             <div className="flex items-center gap-3">

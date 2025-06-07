@@ -24,10 +24,7 @@ interface OrdersResponse {
   orders: Order[];
 }
 
-// Hàm để lấy nhãn trạng thái từ enum
-
-
-// Hàm truy vấn để lấy đơn hàng - trả về Order[] thô từ API
+// Fetch orders function
 const fetchOrders = async (userId?: string): Promise<Order[]> => {
   if (!userId) return [];
 
@@ -46,11 +43,7 @@ export default function OrdersPage() {
   } = useUserInfo();
 
   // Use React Query to fetch orders
-  const {
-    data: orders = [],
-    isLoading: isLoadingOrders,
-   
-  } = useQuery({
+  const { data: orders = [], isLoading: isLoadingOrders } = useQuery({
     queryKey: ["orders", user?.userId],
     queryFn: () => fetchOrders(user?.userId),
     enabled: !!user?.userId, // Only run query when userId is available
@@ -58,7 +51,6 @@ export default function OrdersPage() {
   });
 
   // Status color mapping
- 
 
   if (isLoadingUser) {
     return <OrdersPageSkeleton />;
@@ -76,8 +68,6 @@ export default function OrdersPage() {
       </div>
     );
   }
-
- 
 
   return (
     <div className="container mx-auto p-2 sm:p-6 max-w-4xl">

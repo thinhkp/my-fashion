@@ -15,7 +15,7 @@ export default function UserLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { data: user, isLoading, } = useUserInfo();
+  const { data: user, isLoading } = useUserInfo();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Redirect to login if not authenticated

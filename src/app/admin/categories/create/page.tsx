@@ -83,7 +83,7 @@ export default function CreateCategoryPage() {
   // Watch name for slug generation
 
   // Fetch categories for parent dropdown
-  const { data: categories = [],  } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ["admin-categories"],
     queryFn: fetchCategories,
   });

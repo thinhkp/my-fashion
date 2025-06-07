@@ -17,29 +17,22 @@ export const getOrderStatusLabel = (statusCode: number): string => {
   const statusName = OrderStatus[statusCode] || "Unknown";
   return statusMap[statusName] || statusName;
 };
-// Status color mapping
+
+// Ánh xạ màu sắc cho trạng thái đơn hàng
 export const getOrderStatusColor = (statusCode: number) => {
   switch (statusCode) {
-    case OrderStatus.Pending: // 0
+    case OrderStatus.Pending: // 0 - Chờ xác nhận
       return "bg-gray-100 text-gray-800 border-gray-200";
-    case OrderStatus.Confirmed: // 1
+    case OrderStatus.Confirmed: // 1 - Đã xác nhận
       return "bg-blue-100 text-blue-800 border-blue-200";
-    case OrderStatus.Processing: // 2
+    case OrderStatus.Processing: // 2 - Đang xử lý
       return "bg-yellow-100 text-yellow-800 border-yellow-200";
-    case OrderStatus.ReadyToShip: // 3
-      return "bg-indigo-100 text-indigo-800 border-indigo-200";
-    case OrderStatus.Shipping: // 4
+    case OrderStatus.Shipping: // 3 - Đang giao
       return "bg-purple-100 text-purple-800 border-purple-200";
-    case OrderStatus.Delivered: // 5
+    case OrderStatus.Delivered: // 4 - Đã giao
       return "bg-green-100 text-green-800 border-green-200";
-    case OrderStatus.Completed: // 6
-      return "bg-emerald-100 text-emerald-800 border-emerald-200";
-    case OrderStatus.Cancelled: // 7
+    case OrderStatus.Cancelled: // 5 - Đã hủy
       return "bg-red-100 text-red-800 border-red-200";
-    case OrderStatus.FailedDelivery: // 8
-      return "bg-orange-100 text-orange-800 border-orange-200";
-    case OrderStatus.Returned: // 9
-      return "bg-amber-100 text-amber-800 border-amber-200";
     default:
       return "bg-gray-100 text-gray-800 border-gray-200";
   }

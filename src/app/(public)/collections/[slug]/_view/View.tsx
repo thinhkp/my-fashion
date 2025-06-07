@@ -301,7 +301,7 @@ const View = ({ products: initProduct, sizes, colors, cate }: ViewProps) => {
                   </AccordionItem>
 
                   <AccordionItem value="item-4">
-                    <AccordionTrigger>Size</AccordionTrigger>
+                    <AccordionTrigger>Kích thước</AccordionTrigger>
                     <AccordionContent>
                       <div className="flex flex-wrap gap-1">
                         {sizes.map((item) => (
@@ -398,7 +398,7 @@ const View = ({ products: initProduct, sizes, colors, cate }: ViewProps) => {
               </AccordionItem>
 
               <AccordionItem value="item-4">
-                <AccordionTrigger>Size</AccordionTrigger>
+                <AccordionTrigger>Kích thước</AccordionTrigger>
                 <AccordionContent>
                   {sizes.map((item) => (
                     <Button

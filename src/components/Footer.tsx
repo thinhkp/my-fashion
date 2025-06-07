@@ -14,7 +14,12 @@ export default function Footer() {
     <footer className="m-container text-gray-700">
       {/* Mobile View with Accordions */}
       <div className="lg:hidden  bg-white border-y">
-        <Accordion type="single" defaultValue="section-4" collapsible className="w-full grid grid-cols-1">
+        <Accordion
+          type="single"
+          defaultValue="section-4"
+          collapsible
+          className="w-full grid grid-cols-1"
+        >
           {/* Section 1 */}
           <AccordionItem value="section-1">
             <AccordionTrigger className="px-6 py-3 font-bold text-red-600">

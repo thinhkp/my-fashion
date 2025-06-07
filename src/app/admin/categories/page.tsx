@@ -168,8 +168,8 @@ export default function CategoriesPage() {
     if (!sortField) return 0;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let aValue: any = null,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    bValue: any = null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      bValue: any = null;
 
     if (sortField === "name") {
       aValue = a.name || "";
@@ -494,7 +494,8 @@ export default function CategoriesPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Xác nhận xóa danh mục</AlertDialogTitle>
             <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa danh mục &quot;{categoryToDelete?.name}&quot;?
+              Bạn có chắc chắn muốn xóa danh mục &quot;{categoryToDelete?.name}
+              &quot;?
               <br />
               Việc này có thể ảnh hưởng đến các sản phẩm thuộc danh mục này.
             </AlertDialogDescription>

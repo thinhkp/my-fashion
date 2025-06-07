@@ -37,7 +37,7 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function getRelatedProducts(productId: number, limit: number = 4) {
-  // Get the product with its categories
+  // Lấy sản phẩm cùng với các danh mục của nó
   const product = await prisma.product.findUnique({
     where: { id: productId },
     include: {
@@ -51,14 +51,14 @@ export async function getRelatedProducts(productId: number, limit: number = 4) {
 
   if (!product) return [];
 
-  // Get category IDs of the current product
+  // Lấy danh sách ID danh mục của sản phẩm hiện tại
   const categoryIds = product.productcategory.map((pc) => pc.categoryid);
 
-  // Find related products that share categories
+  // Tìm các sản phẩm liên quan có chung danh mục
   const relatedProducts = await prisma.product.findMany({
     where: {
       AND: [
-        { id: { not: productId } }, // Exclude current product
+        { id: { not: productId } }, // Loại trừ sản phẩm hiện tại
         {
           productcategory: {
             some: {
@@ -66,7 +66,7 @@ export async function getRelatedProducts(productId: number, limit: number = 4) {
             },
           },
         },
-        { status: 1 }, // Assuming 1 means active/published
+        { status: 1 }, // Giả sử 1 có nghĩa là hoạt động/công khai
       ],
     },
     include: {
@@ -84,7 +84,7 @@ export async function getRelatedProducts(productId: number, limit: number = 4) {
     },
     take: limit,
     orderBy: {
-      id: "desc", // Get newest products first
+      id: "desc", // Lấy sản phẩm mới nhất trước
     },
   });
 
