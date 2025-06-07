@@ -7,7 +7,7 @@ interface JWTPayload {
   userId?: number;
   roles?: string[];
   email?: string;
-  // Tắt kiểm tra ESLint cho thuộc tính động
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 

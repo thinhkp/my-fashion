@@ -60,9 +60,7 @@ function ResetPasswordForm() {
     onSuccess: () => {
       setIsCompleted(true);
     },
-    onError: (error: any) => {
-      // Error will be displayed in UI
-    },
+   
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,7 +140,10 @@ function ResetPasswordForm() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                {(resetPasswordMutation.error as any)?.response?.data
+                
+                {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (resetPasswordMutation.error as any)?.response?.data
                   ?.message || "Có lỗi xảy ra, vui lòng thử lại"}
               </AlertDescription>
             </Alert>

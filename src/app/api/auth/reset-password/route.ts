@@ -33,12 +33,13 @@ export async function POST(request: NextRequest) {
     const { token, password } = validationResult.data;
 
     // Verify JWT token với jose
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let decodedToken: any;
     try {
       const secretKey = new TextEncoder().encode(JWT_SECRET);
       const { payload } = await jwtVerify(token, secretKey);
       decodedToken = payload;
-    } catch (error) {
+    } catch  {
       return NextResponse.json(
         {
           success: false,

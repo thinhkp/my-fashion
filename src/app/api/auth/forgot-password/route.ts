@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
     `;
 
     try {
-      const result = await transporter.sendMail({
+       await transporter.sendMail({
         from: `"My Fashion" <${EMAIL_USER}>`,
         to: user.email,
         subject: "🔐 Đặt lại mật khẩu - My Fashion",

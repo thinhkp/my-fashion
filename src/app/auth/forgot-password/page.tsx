@@ -24,12 +24,10 @@ export default function ForgotPasswordPage() {
       });
       return response.data;
     },
-    onSuccess: (data) => {
+    onSuccess:  () => {
       setIsSubmitted(true);
     },
-    onError: (error: any) => {
-      // Lỗi sẽ được hiển thị trong UI
-    },
+    
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,6 +93,7 @@ export default function ForgotPasswordPage() {
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
                 {validationError ||
+                  //  eslint-disable-next-line 
                   (forgotPasswordMutation.error as any)?.response?.data
                     ?.message ||
                   "Có lỗi xảy ra, vui lòng thử lại"}
